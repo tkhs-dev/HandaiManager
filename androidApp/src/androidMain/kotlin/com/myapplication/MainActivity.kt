@@ -1,4 +1,4 @@
-package com.myapplication
+package dev.tkhs.handaimanager
 
 import MainView
 import android.os.Bundle

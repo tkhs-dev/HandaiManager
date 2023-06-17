@@ -1,4 +1,4 @@
-rootProject.name = "MyApplication"
+rootProject.name = "HandaiManager"
 
 include(":androidApp")
 include(":shared")
