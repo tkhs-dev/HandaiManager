@@ -35,6 +35,13 @@ kotlin {
                 implementation(compose.material)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
+
+                implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
+
+                implementation(kotlin("test"))
+                implementation(kotlin("test-junit"))
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
             }
         }
         val androidMain by getting {
@@ -80,4 +87,7 @@ android {
     kotlin {
         jvmToolchain(17)
     }
+}
+dependencies {
+    androidTestImplementation("org.testng:testng:6.9.6")
 }
