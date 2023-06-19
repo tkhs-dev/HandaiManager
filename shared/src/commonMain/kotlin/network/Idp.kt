@@ -3,17 +3,13 @@ package network
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.flatMap
-import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOr
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapBoth
-import com.github.michaelbull.result.mapEither
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.orElse
+import de.jensklingenberg.ktorfit.Call
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Query
 
 /**
  * 大阪大学のIDPでの認証を取り扱うクラス
@@ -32,12 +28,12 @@ object Idp {
      */
     fun authenticate(redirectUrl: String, userid: String, password: String, code: String): AuthResult {
         return useCookie().orElse {
-            if(it == AuthError.NEED_CREDENTIALS){
-                authPassword(redirectUrl, userid, password)
-            }else{
-                return AuthResult.ERROR
+                if(it == AuthError.NEED_CREDENTIALS){
+                    authPassword(redirectUrl, userid, password)
+                }else{
+                    return AuthResult.ERROR
+                }
             }
-        }
             .orElse {
                 if(it == AuthError.NEED_OTP){
                     authOtp(code)
@@ -128,5 +124,16 @@ object Idp {
          * ログインに失敗した
          */
         FAILED
+    }
+
+    /**
+     * Retrofit用のインターフェース
+     */
+    interface IdpService{
+        @GET("idp/authnPwd")
+        fun authPassword(
+            @Query("USER_ID") userid: String,
+            @Query("USER_PASSWORD") password: String,
+        ): Call<ResponseBody>
     }
 }
