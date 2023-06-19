@@ -3,6 +3,15 @@ plugins {
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
+    id("com.google.devtools.ksp") version "1.8.21-1.0.11"
+    id("de.jensklingenberg.ktorfit") version "1.0.0"
+}
+
+val ktorVersion = "2.3.1"
+val ktorfitVersion = "1.4.1"
+
+configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
+    version = ktorfitVersion
 }
 
 kotlin {
@@ -37,6 +46,7 @@ kotlin {
                 implementation(compose.components.resources)
 
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
 
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
@@ -89,5 +99,9 @@ android {
     }
 }
 dependencies {
-    androidTestImplementation("org.testng:testng:6.9.6")
+    add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    add("kspDesktop", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    add("kspAndroid", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    add("kspIosX64", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    androidTestImplementation("org.testng:testng:7.8.0")
 }
