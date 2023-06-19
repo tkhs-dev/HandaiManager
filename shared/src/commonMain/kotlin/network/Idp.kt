@@ -7,17 +7,26 @@ import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.getOr
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.orElse
-import de.jensklingenberg.ktorfit.Call
+import de.jensklingenberg.ktorfit.Ktorfit
+import de.jensklingenberg.ktorfit.http.Field
+import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 
 /**
  * 大阪大学のIDPでの認証を取り扱うクラス
  */
 object Idp {
-    const val AUTH_PWD_URI = "https://ou-idp.auth.osaka-u.ac.jp/idp/authnPwd"
-    const val AUTH_OTP_URI = "https://ou-idp.auth.osaka-u.ac.jp/idp/otpAuth"
-    const val ROLE_SELECT_URI = "https://ou-idp.auth.osaka-u.ac.jp/idp/roleselect"
+    val ktorfit = Ktorfit.Builder().httpClient(HttpClient(){
+        followRedirects = false
+        install(HttpCookies)
+    }).baseUrl("https://ou-idp.auth.osaka-u.ac.jp/").build()
+    val idpApi = ktorfit.create<IdpService>()
 
     /**
      * 大阪大学のIDPで認証を行う
@@ -26,10 +35,10 @@ object Idp {
      * @param password パスワード
      * @param code 二段階認証のコード
      */
-    fun authenticate(redirectUrl: String, userid: String, password: String, code: String): AuthResult {
-        return useCookie().orElse {
+    suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): AuthResult {
+        return tryUseCookie(authRequestData).orElse {
                 if(it == AuthError.NEED_CREDENTIALS){
-                    authPassword(redirectUrl, userid, password)
+                    authPassword(userid, password)
                 }else{
                     return AuthResult.ERROR
                 }
@@ -57,18 +66,38 @@ object Idp {
     /**
      * クッキーが利用できないか確認
      */
-    private fun useCookie(): Result<Unit, AuthError> {
-        return Err(AuthError.NEED_CREDENTIALS)
+    private suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<Unit, AuthError> {
+        val res = idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
+        if(res.status.value == 200){
+            if(res.bodyAsText().contains("利用者選択")){
+                print("クッキーあり")
+                return Ok(Unit)
+            }else{
+                print("認証必要")
+                return Err(AuthError.NEED_CREDENTIALS)
+            }
+        }else{
+            return Err(AuthError.FAILED)
+        }
     }
 
     /**
      * ユーザーIDとパスワードで認証
      */
-    private fun authPassword(
-        redirectUrl: String, userid: String, password: String
+    private suspend fun authPassword(
+        userid: String, password: String
     ): Result<Unit, AuthError> {
-        print("Auth password")
-        return Err(AuthError.NEED_OTP)
+        val res = idpApi.authPassword(userid, password)
+        if(res.contains("認証エラー")){
+            print("認証エラー")
+            return Err(AuthError.WRONG_CREDENTIALS)
+        }else if(res.contains("MFA")){
+            print("MFA必要")
+            return Err(AuthError.NEED_OTP)
+        }else{
+            print("認証成功")
+            return Ok(Unit)
+        }
     }
 
     /**
@@ -94,6 +123,10 @@ object Idp {
             val ERROR:AuthResult = AuthResult(AuthStatus.ERROR, null, null)
         }
     }
+
+    data class AuthRequestData(
+        val samlRequest: String, val relayState: String?, val sigAlg: String, val signature: String
+    )
 
     enum class AuthStatus {
         SUCCESS, WRONG_CREDENTIALS, WRONG_OTP_CODE, ERROR
@@ -125,15 +158,25 @@ object Idp {
          */
         FAILED
     }
+}
 
-    /**
-     * Retrofit用のインターフェース
-     */
-    interface IdpService{
-        @GET("idp/authnPwd")
-        fun authPassword(
-            @Query("USER_ID") userid: String,
-            @Query("USER_PASSWORD") password: String,
-        ): Call<ResponseBody>
-    }
+/**
+ * Ktorfit用のインターフェース
+ */
+interface IdpService{
+    @GET("idp/sso_redirect")
+    suspend fun connectSsoSite(
+        @Query("SAMLRequest") samlRequest: String,
+        @Query("RelayState") relayState: String?,
+        @Query("SigAlg") sigAlg: String,
+        @Query("Signature") signature: String,
+    ): HttpResponse
+
+    @POST("idp/authnPwd")
+    suspend fun authPassword(
+        @Query("USER_ID") userid: String,
+        @Query("USER_PASSWORD") password: String,
+        @Query("CHECK_BOX") checkbox: String = "",
+        @Query("IDButton") submit: String = "ログイン"
+    ): String
 }
