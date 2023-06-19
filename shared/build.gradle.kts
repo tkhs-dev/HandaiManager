@@ -3,6 +3,7 @@ plugins {
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
+    kotlin("plugin.serialization") version "1.8.21"
     id("com.google.devtools.ksp") version "1.8.21-1.0.11"
     id("de.jensklingenberg.ktorfit") version "1.0.0"
 }
@@ -45,8 +46,15 @@ kotlin {
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
 
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
+
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+
+                implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
