@@ -1,3 +1,4 @@
+import com.github.michaelbull.result.get
 import kotlinx.coroutines.runBlocking
 import network.Cle
 import network.Idp
@@ -11,8 +12,6 @@ class IdpTest{
         val result = runBlocking {
             Idp.authenticate(authReqData,"","","")
         }
-        print(result.status.name)
-        print("\n")
-        assertEquals(result.status,Idp.AuthStatus.SUCCESS)
+        assertEquals(result.get() == null, true)
     }
 }

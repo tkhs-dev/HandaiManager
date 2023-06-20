@@ -35,32 +35,22 @@ object Idp {
      * @param password パスワード
      * @param code 二段階認証のコード
      */
-    suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): AuthResult {
+    suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): Result<AuthResult,AuthError> {
         return tryUseCookie(authRequestData).orElse {
                 if(it == AuthError.NEED_CREDENTIALS){
                     authPassword(userid, password)
                 }else{
-                    return AuthResult.ERROR
+                    Err(it)
                 }
             }
             .orElse {
                 if(it == AuthError.NEED_OTP){
                     authOtp(code)
-                }else if(it == AuthError.WRONG_CREDENTIALS){
-                    return AuthResult(AuthStatus.WRONG_CREDENTIALS, null, null)
                 }else{
-                    return AuthResult.ERROR
-                }
-            }
-            .mapError {
-                if(it == AuthError.WRONG_OTP_CODE){
-                    return AuthResult(AuthStatus.WRONG_OTP_CODE, null, null)
-                }else if(it == AuthError.FAILED){
-                    return AuthResult.ERROR
+                    Err(it)
                 }
             }
             .flatMap { roleSelect() }
-            .getOr(AuthResult.ERROR)
     }
 
     /**
@@ -70,10 +60,8 @@ object Idp {
         val res = idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
         if(res.status.value == 200){
             if(res.bodyAsText().contains("利用者選択")){
-                print("クッキーあり")
                 return Ok(Unit)
             }else{
-                print("認証必要")
                 return Err(AuthError.NEED_CREDENTIALS)
             }
         }else{
@@ -89,13 +77,10 @@ object Idp {
     ): Result<Unit, AuthError> {
         val res = idpApi.authPassword(userid, password)
         if(res.contains("認証エラー")){
-            print("認証エラー")
             return Err(AuthError.WRONG_CREDENTIALS)
         }else if(res.contains("MFA")){
-            print("MFA必要")
             return Err(AuthError.NEED_OTP)
         }else{
-            print("認証成功")
             return Ok(Unit)
         }
     }
@@ -103,36 +88,40 @@ object Idp {
     /**
      * 二段階認証を利用して認証
      */
-    private fun authOtp(code: String): Result<Unit, AuthError> {
-        print("Auth OTP")
-        return Ok(Unit)
+    private suspend fun authOtp(code: String): Result<Unit, AuthError> {
+        val res = idpApi.authMfa(code);
+        if(res.contains("認証エラー")){
+            return Err(AuthError.WRONG_OTP_CODE)
+        }else{
+            return Ok(Unit)
+        }
     }
 
     /**
      * ロール選択画面
      */
-    private fun roleSelect(): Result<AuthResult,Unit> {
-        print("Role select")
-        return Ok(AuthResult(AuthStatus.SUCCESS, null, null))
+    private suspend fun roleSelect(): Result<AuthResult,AuthError> {
+        val res = idpApi.roleSelect()
+        val map = mutableMapOf<String, String>()
+        val l = "name=\"([^\"]+)\"\\s*value=\"([^\"]+)\"".toRegex(RegexOption.IGNORE_CASE).findAll(res)
+            .forEach {
+                matchResult->
+                val (name, value) = matchResult.destructured
+                map[name] = value
+            }
+
+        return Ok(AuthResult(map["SAMLResponse"]?:return Err(AuthError.FAILED), if(map["RelayState"] == "null") null else map["RelayState"]))
     }
 
     data class AuthResult(
-        val status: AuthStatus, val samlResponse: String?, val relayState: String?
-    ){
-        companion object{
-            val ERROR:AuthResult = AuthResult(AuthStatus.ERROR, null, null)
-        }
-    }
+        val samlResponse: String, val relayState: String?
+    )
 
     data class AuthRequestData(
         val samlRequest: String, val relayState: String?, val sigAlg: String, val signature: String
     )
 
-    enum class AuthStatus {
-        SUCCESS, WRONG_CREDENTIALS, WRONG_OTP_CODE, ERROR
-    }
-
-    private enum class AuthError {
+    enum class AuthError {
         /**
          * ユーザーIDまたはパスワードが間違っている
          */
@@ -152,6 +141,11 @@ object Idp {
          * 二段階認証が必要
          */
         NEED_OTP,
+
+        /**
+         * レスポンスが不正
+         */
+        INVALID_RESPONSE,
 
         /**
          * ログインに失敗した
@@ -179,4 +173,13 @@ interface IdpService{
         @Query("CHECK_BOX") checkbox: String = "",
         @Query("IDButton") submit: String = "ログイン"
     ): String
+
+    @POST("idp/otpAuth")
+    suspend fun authMfa(
+        @Query("OTP_CODE") otp: String,
+        @Query("STORE_OTP_AUTH_RESULT") submit: String = "1"
+    ): String
+
+    @POST("idp/roleselect?role=self_0")
+    suspend fun roleSelect(): String
 }
