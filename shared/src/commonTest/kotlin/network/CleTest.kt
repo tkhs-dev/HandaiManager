@@ -1,24 +1,22 @@
 package network
 
-import com.github.michaelbull.result.get
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.flatMap
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class CleTest {
     @Test
     fun testGetAuthRequestData() {
-        val authReqData = runBlocking {
+        val res = runBlocking {
             Cle.getAuthRequestData()
-        } ?: return
-        val result = runBlocking {
-            Idp.authenticate(authReqData,"","","")
+                .flatMap {
+                    Idp.authenticate(it,"","","")
+                }
+                .flatMap {
+                    Cle.signinWithSso(it)
+                }
         }
-        val result2 = runBlocking {
-            Cle.signinWithSso(result.get()!!)
-        }
-        assertEquals(result2.component1(), Unit)
+        assertNull(res.component2())
     }
 }

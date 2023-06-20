@@ -1,3 +1,4 @@
+import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.get
 import kotlinx.coroutines.runBlocking
 import network.Cle
@@ -6,12 +7,14 @@ import kotlin.test.*
 class IdpTest{
     @Test
     fun testAutheenticate(){
-        val authReqData = runBlocking {
-            Cle.getAuthRequestData()
-        } ?: return
         val result = runBlocking {
-            Idp.authenticate(authReqData,"","","")
+            Cle.getAuthRequestData()
+                .flatMap {
+                    Idp.authenticate(it,"","","")
+                }
         }
-        assertEquals(result.get() == null, true)
+            .get()
+        assertNotNull(result)
+
     }
 }

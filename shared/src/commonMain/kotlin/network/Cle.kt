@@ -9,12 +9,12 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.toResultOr
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
-import de.jensklingenberg.ktorfit.http.Query
 import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.statement.bodyAsText
 
 object Cle{
     val ktorfit = Ktorfit.Builder().httpClient(HttpClient(){
@@ -23,15 +23,22 @@ object Cle{
     }).baseUrl("https://www.cle.osaka-u.ac.jp/").build()
     val cleApi = ktorfit.create<CleService>()
 
-    suspend fun getAuthRequestData():Idp.AuthRequestData?{
-        val response = cleApi.getSamlRequest()
-        val params = Url(response.headers[HttpHeaders.Location] ?: return null).parameters
-        return Idp.AuthRequestData(
-            params["SAMLRequest"] ?: return null,
-            params["RelayState"],
-            params["SigAlg"] ?: return null,
-            params["Signature"] ?: return null
-        )
+    suspend fun getAuthRequestData():Result<Idp.AuthRequestData,ApiError>{
+        return cleApi.getSamlRequest()
+            .toResultOr { ApiError.UNKNOWN }
+            .flatMap { it.headers[HttpHeaders.Location]?.let { Url(it).parameters }.toResultOr { ApiError.INVALID_RESPONSE } }
+            .flatMap {
+                if(it["SAMLRequest"] == null || it["SigAlg"] == null || it["Signature"] == null) {
+                    Err(ApiError.INVALID_RESPONSE)
+                }else{
+                    Ok(Idp.AuthRequestData(
+                        it["SAMLRequest"]!!,
+                        it["RelayState"],
+                        it["SigAlg"]!!,
+                        it["Signature"]!!
+                    ) )
+                }
+            }
     }
 
     suspend fun signinWithSso(authResult: Idp.AuthResult): Result<Unit,Unit>{
@@ -41,6 +48,12 @@ object Cle{
         }else{
             Err(Unit)
         }
+    }
+
+    enum class ApiError{
+        INVALID_PARAMETER,
+        INVALID_RESPONSE,
+        UNKNOWN
     }
 }
 
