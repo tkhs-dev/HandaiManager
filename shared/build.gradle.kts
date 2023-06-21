@@ -4,7 +4,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization") version "1.8.21"
-    id("com.google.devtools.ksp") version "1.8.21-1.0.11"
+    id("com.google.devtools.ksp") version "1.8.20-1.0.11"
     id("de.jensklingenberg.ktorfit") version "1.0.0"
 }
 
