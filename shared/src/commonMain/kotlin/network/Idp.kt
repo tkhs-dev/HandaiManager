@@ -17,16 +17,23 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import org.koin.core.component.KoinComponent
 
 /**
  * 大阪大学のIDPでの認証を取り扱うクラス
  */
-object Idp {
-    val ktorfit = Ktorfit.Builder().httpClient(HttpClient(){
-        followRedirects = false
-        install(HttpCookies)
-    }).baseUrl("https://ou-idp.auth.osaka-u.ac.jp/").build()
-    val idpApi = ktorfit.create<IdpService>()
+class Idp(
+    val idpApi: IdpService =
+        Ktorfit.Builder().httpClient(HttpClient(){
+            followRedirects = false
+            install(HttpCookies)
+        }).baseUrl(BASE_URL)
+            .build()
+            .create<IdpService>()
+) {
+    companion object{
+        val BASE_URL = "https://ou-idp.auth.osaka-u.ac.jp/"
+    }
 
     /**
      * 大阪大学のIDPで認証を行う

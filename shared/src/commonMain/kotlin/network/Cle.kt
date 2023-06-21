@@ -16,13 +16,18 @@ import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
 import io.ktor.client.request.forms.FormDataContent
 
-object Cle{
-    val ktorfit = Ktorfit.Builder().httpClient(HttpClient(){
-        followRedirects = false
-        install(HttpCookies)
-    }).baseUrl("https://www.cle.osaka-u.ac.jp/").build()
-    val cleApi = ktorfit.create<CleService>()
-
+class Cle(
+    val cleApi: CleService =
+        Ktorfit.Builder().httpClient(HttpClient(){
+            followRedirects = false
+            install(HttpCookies)
+        }).baseUrl(Cle.BASE_URL)
+            .build()
+            .create<CleService>()
+){
+    companion object {
+        val BASE_URL = "https://www.cle.osaka-u.ac.jp/"
+    }
     suspend fun getAuthRequestData():Result<Idp.AuthRequestData,ApiError>{
         return cleApi.getSamlRequest()
             .toResultOr { ApiError.UNKNOWN }

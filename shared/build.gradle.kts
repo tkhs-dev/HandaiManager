@@ -46,6 +46,9 @@ kotlin {
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
 
+                implementation("io.insert-koin:koin-core:3.4.2")
+                implementation("io.insert-koin:koin-test:3.4.1")
+
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
 
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
@@ -55,6 +58,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+                implementation("io.ktor:ktor-client-mock:$ktorVersion")
 
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
@@ -112,4 +116,6 @@ dependencies {
     add("kspAndroid", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspIosX64", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     androidTestImplementation("org.testng:testng:7.8.0")
+    testImplementation("io.insert-koin:koin-test:3.4.1")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 }
