@@ -6,12 +6,18 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import di.AppModule
 import io.github.xxfast.decompose.LocalComponentContext
+import org.koin.core.context.GlobalContext.startKoin
 import ui.page.login.LoginScreen
 
 fun main() = application {
     val lifecycle = LifecycleRegistry()
     val rootComponentContext = DefaultComponentContext(lifecycle = lifecycle)
+
+    startKoin(){
+        modules(AppModule().appModule())
+    }
 
     Window(onCloseRequest = ::exitApplication) {
         CompositionLocalProvider(LocalComponentContext provides rootComponentContext) {
