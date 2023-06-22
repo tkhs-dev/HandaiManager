@@ -3,6 +3,7 @@ package network
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.getOr
 import com.github.michaelbull.result.mapError
@@ -43,18 +44,18 @@ class Idp(
      * @param code 二段階認証のコード
      */
     suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): Result<AuthResult,AuthError> {
-        return tryUseCookie(authRequestData).orElse {
-                if(it == AuthError.NEED_CREDENTIALS){
+        return tryUseCookie(authRequestData).andThen {
+                if(it == AuthStatus.NEED_CREDENTIALS){
                     authPassword(userid, password)
                 }else{
-                    Err(it)
+                    Ok(it)
                 }
             }
-            .orElse {
-                if(it == AuthError.NEED_OTP){
+            .andThen {
+                if(it == AuthStatus.NEED_OTP){
                     authOtp(code)
                 }else{
-                    Err(it)
+                    Ok(it)
                 }
             }
             .flatMap { roleSelect() }
@@ -63,13 +64,13 @@ class Idp(
     /**
      * クッキーが利用できないか確認
      */
-    private suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<Unit, AuthError> {
+    private suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<AuthStatus, AuthError> {
         val res = idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
         if(res.status.value == 200){
             if(res.bodyAsText().contains("利用者選択")){
-                return Ok(Unit)
+                return Ok(AuthStatus.SUCCESS)
             }else{
-                return Err(AuthError.NEED_CREDENTIALS)
+                return Ok(AuthStatus.NEED_CREDENTIALS)
             }
         }else{
             return Err(AuthError.FAILED)
@@ -81,26 +82,30 @@ class Idp(
      */
     private suspend fun authPassword(
         userid: String, password: String
-    ): Result<Unit, AuthError> {
+    ): Result<AuthStatus, AuthError> {
         val res = idpApi.authPassword(userid, password)
         if(res.contains("認証エラー")){
             return Err(AuthError.WRONG_CREDENTIALS)
         }else if(res.contains("MFA")){
-            return Err(AuthError.NEED_OTP)
+            return Ok(AuthStatus.NEED_OTP)
+        }else if(res.contains("利用者選択")){
+            return Ok(AuthStatus.SUCCESS)
         }else{
-            return Ok(Unit)
+            return Err(AuthError.FAILED)
         }
     }
 
     /**
      * 二段階認証を利用して認証
      */
-    private suspend fun authOtp(code: String): Result<Unit, AuthError> {
+    private suspend fun authOtp(code: String): Result<AuthStatus, AuthError> {
         val res = idpApi.authMfa(code);
         if(res.contains("認証エラー")){
             return Err(AuthError.WRONG_OTP_CODE)
+        }else if(res.contains("利用者選択")){
+            return Ok(AuthStatus.SUCCESS)
         }else{
-            return Ok(Unit)
+            return Err(AuthError.FAILED)
         }
     }
 
@@ -128,6 +133,23 @@ class Idp(
         val samlRequest: String, val relayState: String?, val sigAlg: String, val signature: String
     )
 
+    enum class AuthStatus{
+        /**
+         * ユーザーIDとパスワードの入力が必要
+         */
+        NEED_CREDENTIALS,
+
+        /**
+         * 二段階認証が必要
+         */
+        NEED_OTP,
+
+        /**
+         * 認証成功
+         */
+        SUCCESS
+    }
+
     enum class AuthError {
         /**
          * ユーザーIDまたはパスワードが間違っている
@@ -138,16 +160,6 @@ class Idp(
          * 二段階認証のコードが間違っている
          */
         WRONG_OTP_CODE,
-
-        /**
-         * ユーザーIDとパスワードの入力が必要
-         */
-        NEED_CREDENTIALS,
-
-        /**
-         * 二段階認証が必要
-         */
-        NEED_OTP,
 
         /**
          * レスポンスが不正
