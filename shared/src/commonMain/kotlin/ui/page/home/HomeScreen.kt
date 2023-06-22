@@ -1,11 +1,9 @@
 package ui.page.home
 
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
-import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import io.github.xxfast.decompose.router.Router
 import io.github.xxfast.decompose.router.content.RoutedContent
@@ -27,9 +25,7 @@ fun HomeScreen() {
                 }
 
             Screen.Login ->
-                Button({router.pop()}) {
-                    Text("Login!!")
-                }
+                LoginScreen()
         }
     }
 }
