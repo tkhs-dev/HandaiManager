@@ -12,7 +12,6 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":shared"))
-                implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
                 implementation("io.github.xxfast:decompose-router:0.2.1")
                 implementation("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-beta-01")

@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("kotlin-parcelize")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization") version "1.8.21"
     id("com.google.devtools.ksp") version "1.8.20-1.0.11"
@@ -43,6 +44,7 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material)
+                implementation(compose.material3)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
 
