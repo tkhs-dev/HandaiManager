@@ -48,6 +48,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
             val res = loginUseCase.prepareForLogin()
             _uiState.update { it.copy(isLoading = false) }
             res.onSuccess { status ->
+                _uiState.update { it.copy(error = "") }
                 when(status){
                     LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
                     LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
@@ -62,12 +63,29 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
             val res = loginUseCase.authPassword(uiState.value.userId,uiState.value.password)
             _uiState.update { it.copy(isLoading = false) }
             res.onSuccess {
+                _uiState.update { it.copy(error = "") }
                 when(it){
                     LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
                     LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
                     LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
                 }
             }.onFailure { _uiState.update { it.copy(error = "Wrong userId or password.Or some error is occurred.") } }
+        }
+    }
+
+    suspend fun onAuthOtpClicked() {
+        return coroutineScope {
+            _uiState.update { it.copy(isLoading = true) }
+            val res = loginUseCase.authOtp(uiState.value.otpCode)
+            _uiState.update { it.copy(isLoading = false) }
+            res.onSuccess {
+                _uiState.update { it.copy(error = "") }
+                when(it){
+                    LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
+                    LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                    LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+                }
+            }.onFailure { _uiState.update { it.copy(error = "Wrong otp code.Or some error is occurred.") } }
         }
     }
 }
