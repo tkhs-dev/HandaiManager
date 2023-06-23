@@ -127,9 +127,6 @@ dependencies {
     add("kspAndroid", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspIosX64", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
-    androidTestImplementation("org.testng:testng:7.8.0")
-    testImplementation("io.insert-koin:koin-test:3.4.1")
-    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 }
 
 multiplatformResources {
