@@ -71,7 +71,11 @@ fun LoginScreen() {
                 }
 
             LoginFlowScreen.AuthOtp ->
-                AuthOtp(viewModel){router.push(LoginFlowScreen.Information)}
+                AuthOtp(viewModel){
+                    scope.launch {
+                        viewModel.onAuthOtpClicked()
+                    }
+                }
 
             LoginFlowScreen.LoginResult ->
                 LoginResult()
@@ -154,12 +158,19 @@ fun AuthOtp(viewModel: LoginScreenViewModel,onNext:()->Unit){
         TextField(
             value = uiState.otpCode,
             label = { Text("ワンタイムパスワード") },
+            isError = uiState.error.isNotEmpty(),
+            supportingText = { if(uiState.error.isNotEmpty()) Text(uiState.error) else null },
             onValueChange = { viewModel.onOtpCodeChanged(it) },
             colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done,
+            )
         )
-        Button(onClick = { onNext() }, modifier = Modifier.width(280.dp)) {
-            Text("次へ")
+        Button(onClick = { onNext() }, modifier = Modifier.width(280.dp),enabled = !uiState.isLoading) {
+            if(!uiState.isLoading)Text("次へ")
+            else CircularProgressIndicator(modifier =  Modifier.size(20.dp))
         }
     }
 }
