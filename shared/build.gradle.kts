@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization") version "1.8.21"
     id("com.google.devtools.ksp") version "1.8.20-1.0.11"
     id("de.jensklingenberg.ktorfit") version "1.0.0"
+    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 val ktorVersion = "2.3.1"
@@ -67,6 +68,9 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
 
+                implementation("dev.icerock.moko:resources:0.23.0")
+                implementation("dev.icerock.moko:resources-compose:0.23.0")
+
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
                 implementation(kotlin("test-common"))
@@ -122,7 +126,12 @@ dependencies {
     add("kspDesktop", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspAndroid", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspIosX64", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
     androidTestImplementation("org.testng:testng:7.8.0")
     testImplementation("io.insert-koin:koin-test:3.4.1")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+}
+
+multiplatformResources {
+    multiplatformResourcesPackage = "dev.tkhs.handaimanager" // required
 }
