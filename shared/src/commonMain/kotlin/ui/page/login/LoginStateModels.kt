@@ -8,4 +8,5 @@ sealed class LoginFlowScreen: Parcelable {
     object Information: LoginFlowScreen()
     object AuthPassword: LoginFlowScreen()
     object AuthOtp: LoginFlowScreen()
+    object LoginResult: LoginFlowScreen()
 }
