@@ -5,12 +5,9 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.flatMap
-import com.github.michaelbull.result.getOr
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.orElse
+import com.github.michaelbull.result.runCatching
 import de.jensklingenberg.ktorfit.Ktorfit
-import de.jensklingenberg.ktorfit.http.Field
-import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
@@ -18,7 +15,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import org.koin.core.component.KoinComponent
 
 /**
  * 大阪大学のIDPでの認証を取り扱うクラス
@@ -64,7 +60,7 @@ class Idp(
     /**
      * クッキーが利用できないか確認
      */
-    private suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<AuthStatus, AuthError> {
+    suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<AuthStatus, AuthError> {
         val res = idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
         if(res.status.value == 200){
             if(res.bodyAsText().contains("利用者選択")){
@@ -80,25 +76,29 @@ class Idp(
     /**
      * ユーザーIDとパスワードで認証
      */
-    private suspend fun authPassword(
+    suspend fun authPassword(
         userid: String, password: String
     ): Result<AuthStatus, AuthError> {
-        val res = idpApi.authPassword(userid, password)
-        if(res.contains("認証エラー")){
-            return Err(AuthError.WRONG_CREDENTIALS)
-        }else if(res.contains("MFA")){
-            return Ok(AuthStatus.NEED_OTP)
-        }else if(res.contains("利用者選択")){
-            return Ok(AuthStatus.SUCCESS)
-        }else{
-            return Err(AuthError.FAILED)
-        }
+        return runCatching { idpApi.authPassword(userid, password) }
+            .mapError { AuthError.FAILED }
+            .andThen {
+                if (it.contains("認証エラー")) {
+                    idpApi.refreshAuthPage()
+                    Err(AuthError.WRONG_CREDENTIALS)
+                } else if (it.contains("MFA")) {
+                    Ok(AuthStatus.NEED_OTP)
+                } else if (it.contains("利用者選択")) {
+                    Ok(AuthStatus.SUCCESS)
+                } else {
+                    Err(AuthError.FAILED)
+                }
+            }
     }
 
     /**
      * 二段階認証を利用して認証
      */
-    private suspend fun authOtp(code: String): Result<AuthStatus, AuthError> {
+    suspend fun authOtp(code: String): Result<AuthStatus, AuthError> {
         val res = idpApi.authMfa(code);
         if(res.contains("認証エラー")){
             return Err(AuthError.WRONG_OTP_CODE)
@@ -112,7 +112,7 @@ class Idp(
     /**
      * ロール選択画面
      */
-    private suspend fun roleSelect(): Result<AuthResult,AuthError> {
+    suspend fun roleSelect(): Result<AuthResult,AuthError> {
         val res = idpApi.roleSelect()
         val map = mutableMapOf<String, String>()
         val l = "name=\"([^\"]+)\"\\s*value=\"([^\"]+)\"".toRegex(RegexOption.IGNORE_CASE).findAll(res)
@@ -184,6 +184,9 @@ interface IdpService{
         @Query("SigAlg") sigAlg: String,
         @Query("Signature") signature: String,
     ): HttpResponse
+
+    @GET("idp/idplogin")
+    suspend fun refreshAuthPage():Unit
 
     @POST("idp/authnPwd")
     suspend fun authPassword(
