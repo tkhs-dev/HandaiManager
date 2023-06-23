@@ -16,7 +16,7 @@ class LoginScreenViewModel() {
     val uiState = _uiState.asStateFlow()
 
     fun onUserIdChanged(userId: String) {
-        _uiState.update { it.copy(userId = "a") }
+        _uiState.update { it.copy(userId = userId) }
         print("changed$userId \n")
     }
 
