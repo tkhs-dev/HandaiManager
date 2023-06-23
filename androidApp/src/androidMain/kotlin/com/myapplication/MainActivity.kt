@@ -8,10 +8,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.defaultComponentContext
+import di.AppModule
 import io.github.xxfast.decompose.LocalComponentContext
+import org.koin.core.context.startKoin
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        startKoin(){
+            modules(AppModule().appModule())
+        }
         super.onCreate(savedInstanceState)
         val rootComponentContext: DefaultComponentContext = defaultComponentContext()
         setContent {
