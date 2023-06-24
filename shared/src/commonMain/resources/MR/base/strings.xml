@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="test_string">ねくすと</string>
+    <string name="ou_login">大阪大学ログイン</string>
+    <string name="ou_personal_id">大阪大学個人ID</string>
+    <string name="ou_password">パスワード</string>
+    <string name="ou_otp">ワンタイムパスワード</string>
+
+    <string name="screen_login_attention">注意</string>
+    <string name="next">次へ</string>
+    <string name="screen_login_tos">
+        <![CDATA[
+        大阪大学では、情報セキュリティを確保するため、大阪大学個人IDを含む認証情報を、大阪大学の情報システム以外のサービスで利用しないように注意喚起しています。
+        当サービスは、個人開発であり大阪大学の管理下にありません。そのため、当サービスの利用は自己責任で行ってください。
+        当サービスの利用によって生じた損害について、大阪大学および開発者は一切の責任を負いません。
+    ]]>
+    </string>
+    <string name="screen_login_accept_and_next">理解して進む</string>
 </resources>
