@@ -1,7 +1,5 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +14,6 @@ import io.github.xxfast.decompose.LocalComponentContext
 import io.kanro.compose.jetbrains.expui.theme.LightTheme
 import io.kanro.compose.jetbrains.expui.window.JBWindow
 import org.koin.core.context.GlobalContext.startKoin
-import ui.page.home.HomeScreen
 
 fun main() = application {
     val lifecycle = LifecycleRegistry()
@@ -48,10 +45,4 @@ fun main() = application {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun Preview() {
-    LoginScreen()
 }
