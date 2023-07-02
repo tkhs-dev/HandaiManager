@@ -4,10 +4,10 @@ import domain.repository.CleApiRepository
 import network.Idp
 import network.Cle
 import org.koin.dsl.module
-import ui.page.login.LoginScreenViewModel
+import ui.screen.login.LoginScreenViewModel
 import domain.usecase.LoginUseCase
 import domain.repository.IdpRepository
-import ui.page.home.HomeScreenViewModel
+import ui.screen.home.HomeScreenViewModel
 
 val commonModule = module{
     single{Idp()}
