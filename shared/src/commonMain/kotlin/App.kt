@@ -8,22 +8,6 @@ import ui.screen.home.HomeScreen
 fun App() {
     MaterialTheme {
         HomeScreen()
-//        var greetingText by remember { mutableStateOf("Hello, World!") }
-//        var showImage by remember { mutableStateOf(false) }
-//        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-//            Button(onClick = {
-//                greetingText = "Hello, ${getPlatformName()}"
-//                showImage = !showImage
-//            }) {
-//                Text(greetingText)
-//            }
-//            AnimatedVisibility(showImage) {
-//                Image(
-//                    painterResource("compose-multiplatform.xml"),
-//                    null
-//                )
-//            }
-//        }
     }
 }
 
