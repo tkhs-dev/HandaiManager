@@ -3,7 +3,6 @@ package ui.screen.home
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import ui.screen.login.LoginScreenViewModel
 
 class HomeScreenViewModel {
     data class UiState(
