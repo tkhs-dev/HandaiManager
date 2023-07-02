@@ -1,4 +1,4 @@
-package ui.page.login
+package ui.screen.login
 
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess

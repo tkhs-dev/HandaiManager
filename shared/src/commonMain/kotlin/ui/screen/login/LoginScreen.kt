@@ -1,4 +1,4 @@
-package ui.page.login
+package ui.screen.login
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -47,14 +47,12 @@ fun LoginScreen() {
         val viewModel: LoginScreenViewModel by inject() }
     }.viewModel
 
-    val uiState by viewModel.uiState.collectAsState()
-
-    val router: Router<LoginFlowScreen> = rememberRouter(LoginFlowScreen::class,listOf(LoginFlowScreen.Information))
+    val router: Router<LoginScreenPage> = rememberRouter(LoginScreenPage::class,listOf(LoginScreenPage.Information))
 
     viewModel.setListeners(
-        onLoggedIn = {router.push(LoginFlowScreen.LoginResult)},
-        onNeedPassword = {router.push(LoginFlowScreen.AuthPassword)},
-        onNeedOtp = {router.push(LoginFlowScreen.AuthOtp)}
+        onLoggedIn = {router.push(LoginScreenPage.LoginResultPage)},
+        onNeedPassword = {router.push(LoginScreenPage.AuthPassword)},
+        onNeedOtp = {router.push(LoginScreenPage.AuthOtp)}
     )
 
     val scope = rememberCoroutineScope()
@@ -63,28 +61,28 @@ fun LoginScreen() {
         animation = stackAnimation(slide()),
     ) { screen ->
         when (screen) {
-            LoginFlowScreen.Information ->
+            LoginScreenPage.Information ->
                 Information(viewModel) {
                     scope.launch {
                         viewModel.onStartLoginClicked()
                     }
                 }
 
-            LoginFlowScreen.AuthPassword ->
+            LoginScreenPage.AuthPassword ->
                 AuthPassword(viewModel){
                     scope.launch {
                         viewModel.onAuthPasswordClicked()
                     }
                 }
 
-            LoginFlowScreen.AuthOtp ->
+            LoginScreenPage.AuthOtp ->
                 AuthOtp(viewModel){
                     scope.launch {
                         viewModel.onAuthOtpClicked()
                     }
                 }
 
-            LoginFlowScreen.LoginResult ->
+            LoginScreenPage.LoginResultPage ->
                 LoginResult()
         }
     }
