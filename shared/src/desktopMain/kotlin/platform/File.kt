@@ -1,23 +1,22 @@
 package platform
 
+import com.github.michaelbull.result.toResultOr
 import java.io.File
-import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 actual fun saveFile(fileName: String, data: ByteArray): Boolean {
     val file = File(fileName)
-    file.writeBytes(data)
+    file.writeBytes(data).toResultOr { return false }
     return true
 }
 
 actual fun saveFileEncrypted(
     fileName: String,
     data: ByteArray,
-    key: String
+    key: Any
 ): Boolean {
-    val keyData = MessageDigest.getInstance("SHA-256").digest(key.encodeToByteArray())
-    val skeySpec = SecretKeySpec(keyData, "AES")
+    val skeySpec = getAesKey() as SecretKeySpec
     val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
     cipher.init(Cipher.ENCRYPT_MODE, skeySpec)
     val encrypted = cipher.doFinal(data)

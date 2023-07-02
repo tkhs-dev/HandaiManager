@@ -7,7 +7,7 @@ actual fun saveFile(fileName: String, data: ByteArray): Boolean {
 actual fun saveFileEncrypted(
     fileName: String,
     data: ByteArray,
-    key: String
+    key: Any
 ): Boolean {
     TODO()
 }
