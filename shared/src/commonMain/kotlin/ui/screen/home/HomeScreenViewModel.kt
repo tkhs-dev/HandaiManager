@@ -9,7 +9,7 @@ class HomeScreenViewModel {
         val selectedPage:HomeScreenPage = HomeScreenPage.Dashboard
     )
 
-    private val _uiState = MutableStateFlow(HomeScreenViewModel.UiState())
+    private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
     fun onNavigationDrawerClicked(selected:HomeScreenPage){
