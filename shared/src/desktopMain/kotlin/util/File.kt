@@ -11,8 +11,9 @@ import javax.crypto.spec.SecretKeySpec
 actual object FileUtil{
     actual fun saveFile(fileName: String, data: ByteArray): Boolean {
         val file = File(fileName)
-        file.writeBytes(data).toResultOr { return false }
-        return true
+        return kotlin.runCatching {
+            file.writeBytes(data)
+        }.isSuccess
     }
 
     actual fun saveFileEncrypted(
