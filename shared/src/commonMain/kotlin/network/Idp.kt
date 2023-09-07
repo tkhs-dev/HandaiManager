@@ -34,7 +34,7 @@ class Idp(
 
     /**
      * 大阪大学のIDPで認証を行う
-     * @param redirect 認証後にリダイレクトするURI
+     * @param authRequestData 認証リクエストデータ
      * @param userid ユーザーID
      * @param password パスワード
      * @param code 二段階認証のコード
@@ -115,7 +115,7 @@ class Idp(
     suspend fun roleSelect(): Result<AuthResult,AuthError> {
         val res = idpApi.roleSelect()
         val map = mutableMapOf<String, String>()
-        val l = "name=\"([^\"]+)\"\\s*value=\"([^\"]+)\"".toRegex(RegexOption.IGNORE_CASE).findAll(res)
+        "name=\"([^\"]+)\"\\s*value=\"([^\"]+)\"".toRegex(RegexOption.IGNORE_CASE).findAll(res)
             .forEach {
                 matchResult->
                 val (name, value) = matchResult.destructured
@@ -186,7 +186,7 @@ interface IdpService{
     ): HttpResponse
 
     @GET("idp/idplogin")
-    suspend fun refreshAuthPage():Unit
+    suspend fun refreshAuthPage()
 
     @POST("idp/authnPwd")
     suspend fun authPassword(
