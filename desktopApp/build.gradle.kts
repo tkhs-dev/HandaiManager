@@ -17,6 +17,7 @@ kotlin {
                 implementation("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-beta-01")
                 implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.0.0")
+                //implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
             }
         }
     }
@@ -27,9 +28,17 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "KotlinMultiplatformComposeDesktopApplication"
+            targetFormats(TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "HandaiManager"
             packageVersion = "1.0.0"
+            modules("jdk.unsupported")
+            modules("jdk.accessibility")
+
+            windows{
+                menu = true
+                shortcut = true
+                upgradeUuid = "18159995-d967-4CD2-8885-77BFA97CFA9F"
+            }
         }
     }
 }

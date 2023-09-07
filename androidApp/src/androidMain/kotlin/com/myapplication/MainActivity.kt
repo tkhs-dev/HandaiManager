@@ -11,13 +11,16 @@ import com.arkivanov.decompose.defaultComponentContext
 import di.AppModule
 import io.github.xxfast.decompose.LocalComponentContext
 import org.koin.core.context.startKoin
+import util.FileUtil
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         startKoin(){
             modules(AppModule().appModule())
         }
+
         super.onCreate(savedInstanceState)
+        FileUtil.filesDir = applicationContext.filesDir
         val rootComponentContext: DefaultComponentContext = defaultComponentContext()
         setContent {
             CompositionLocalProvider(LocalComponentContext provides rootComponentContext) {

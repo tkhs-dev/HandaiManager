@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,7 +20,7 @@ fun main() = application {
     val lifecycle = LifecycleRegistry()
     val rootComponentContext = DefaultComponentContext(lifecycle = lifecycle)
 
-    startKoin(){
+    startKoin() {
         modules(AppModule().appModule())
     }
 

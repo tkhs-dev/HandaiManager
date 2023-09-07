@@ -3,7 +3,7 @@
     <string name="ou_login">大阪大学ログイン</string>
     <string name="ou_personal_id">大阪大学個人ID</string>
     <string name="ou_password">パスワード</string>
-    <string name="ou_otp">ワンタイムパスワード</string>
+    <string name="ou_otp">ワンタイムパスワード生成鍵</string>
 
     <string name="screen_login_attention">注意</string>
     <string name="next">次へ</string>
@@ -15,4 +15,17 @@
     ]]>
     </string>
     <string name="screen_login_accept_and_next">理解して進む</string>
+    <string name="screen_login_wrong_credentials">個人IDまたはパスワードが間違っています。</string>
+    <string name="screen_login_otp">OTP生成鍵の登録</string>
+    <string name="screen_login_wrong_otp_secret">ワンタイムパスワード生成鍵が間違っています。</string>
+    <string name="screen_login_otp_attention">
+        <![CDATA[
+        ご利用のアカウントには二段階認証が設定されています。
+        このアプリでは、起動時に毎回二段階認証を行う手間を省くため、ワンタイムパスワードを自動で生成する機能を搭載しています。
+        そのため、ワンタイムパスワードを生成するための鍵を登録する必要があります。
+        この鍵は、端末内でのみ利用され外部に送信されることはありませんが、セキュリティの低下が懸念されるため、その点についてご理解いただける方のみ当アプリをご利用ください。
+    ]]>
+    </string>
+    <string name="screen_login_otp_howto_get_key">鍵を入手する方法</string>
+    <string name="screen_login_otp_howto_get_key_url">https://github.com/tkhs-dev/HandaiManager</string>
 </resources>

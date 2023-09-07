@@ -11,7 +11,7 @@ plugins {
 }
 
 val ktorVersion = "2.3.1"
-val ktorfitVersion = "1.4.1"
+val ktorfitVersion = "1.4.3"
 
 configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
     version = ktorfitVersion
@@ -58,10 +58,11 @@ kotlin {
                 implementation("io.insert-koin:koin-test:3.4.1")
 
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -82,6 +83,8 @@ kotlin {
                 api("androidx.activity:activity-compose:1.6.1")
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
+                implementation("commons-codec:commons-codec:1.16.0")
+                implementation("com.google.guava:guava:32.1.2-android")
             }
         }
         val iosX64Main by getting
@@ -96,6 +99,8 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.common)
+                implementation("ch.qos.logback:logback-classic:1.4.11")
+                implementation("commons-codec:commons-codec:1.16.0")
             }
         }
     }

@@ -1,6 +1,7 @@
 package di
 
 import domain.repository.CleApiRepository
+import domain.repository.CredentialRepository
 import network.Idp
 import network.Cle
 import org.koin.dsl.module
@@ -14,7 +15,8 @@ val commonModule = module{
     single{Cle()}
     single{IdpRepository(get())}
     single{CleApiRepository(get())}
-    single {LoginUseCase(get(),get())}
+    single { CredentialRepository() }
+    single {LoginUseCase(get(),get(),get())}
     factory { LoginScreenViewModel(get())}
     factory { HomeScreenViewModel()}
 }

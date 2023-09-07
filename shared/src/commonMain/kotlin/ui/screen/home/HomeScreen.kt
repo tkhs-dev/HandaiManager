@@ -36,17 +36,16 @@ import io.github.xxfast.decompose.router.content.RoutedContent
 import io.github.xxfast.decompose.router.rememberRouter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import platform.saveFile
-import platform.saveFileEncrypted
 import ui.screen.home.page.Activity
 import ui.screen.home.page.Dashboard
 import ui.screen.home.page.Settings
+import util.FileUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
-    saveFile("aaa.txt","Hello World".encodeToByteArray())
-    saveFileEncrypted("bbb.txt", "Hello World!!It's encrypted!".encodeToByteArray())
+    FileUtil.saveFile("aaa.txt","Hello World".encodeToByteArray())
+    FileUtil.saveFileEncrypted("bbb.txt", "Hello World!!It's encrypted!".encodeToByteArray())
 
     val viewModel = remember{ object : KoinComponent {
         val viewModel: HomeScreenViewModel by inject() }

@@ -2,21 +2,25 @@ package domain.usecase
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.and
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import domain.repository.CleApiRepository
+import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
+import entities.Credential
+import util.Logger
 
-class LoginUseCase(private val idpRepository: IdpRepository,private val cleRepository: CleApiRepository) {
-    suspend fun prepareForLogin():Result<LoginStatus,Unit>{
+class LoginUseCase(
+    private val idpRepository: IdpRepository,
+    private val cleRepository: CleApiRepository,
+    private val credentialRepository: CredentialRepository
+) {
+    suspend fun prepareForLogin(): Result<LoginStatus, Unit> {
         return cleRepository.getAuthRequest()
             .andThen { idpRepository.prepareForLogin(it) }
             .map {
-                when(it){
+                when (it) {
                     IdpRepository.IdpStatus.NEED_CREDENTIALS -> LoginStatus.NEED_CREDENTIALS
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_OTP
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
@@ -24,33 +28,33 @@ class LoginUseCase(private val idpRepository: IdpRepository,private val cleRepos
             }
     }
 
-    fun login():Result<LoginStatus,Unit>{
+    fun login(): Result<LoginStatus, Unit> {
         return Ok(LoginStatus.SUCCESS)
     }
 
-    suspend fun authPassword(userId:String,password:String):Result<LoginStatus,Unit>{
-        return idpRepository.authPassword(userId,password)
+    suspend fun authPassword(userId: String, password: String): Result<LoginStatus, Unit> {
+        return idpRepository.authPassword(userId, password)
             .map {
-                when(it){
+                when (it) {
                     IdpRepository.IdpStatus.NEED_CREDENTIALS -> LoginStatus.NEED_CREDENTIALS
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_OTP
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
                 }
             }
             .andThen {
-                if(it == LoginStatus.SUCCESS)
+                if (it == LoginStatus.SUCCESS)
                     idpRepository.login()
-                        .andThen { cleRepository.login(it)}
-                        .map{ LoginStatus.SUCCESS}
+                        .andThen { cleRepository.login(it) }
+                        .map { LoginStatus.SUCCESS }
                         .mapError { Unit }
                 else Ok(it)
             }
     }
 
-    suspend fun authOtp(code:String):Result<LoginStatus,Unit>{
+    suspend fun authOtp(code: String): Result<LoginStatus, Unit> {
         return idpRepository.authOtp(code)
             .map {
-                when(it){
+                when (it) {
                     IdpRepository.IdpStatus.NEED_CREDENTIALS -> LoginStatus.NEED_CREDENTIALS
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_OTP
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
@@ -58,7 +62,11 @@ class LoginUseCase(private val idpRepository: IdpRepository,private val cleRepos
             }
     }
 
-    enum class LoginStatus{
+    fun saveCredential(credential: Credential) {
+        credentialRepository.saveCredential(credential)
+    }
+
+    enum class LoginStatus {
         NEED_CREDENTIALS,
         NEED_OTP,
         SUCCESS

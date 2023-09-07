@@ -12,7 +12,7 @@ import ui.screen.login.LoginScreen
 
 @Composable
 fun RootScreen() {
-    val router: Router<Screen> = rememberRouter(Screen::class,listOf(Screen.Home))
+    val router: Router<Screen> = rememberRouter(Screen::class,listOf(Screen.Login))
     RoutedContent(
     router = router,
     animation = stackAnimation(fade()),

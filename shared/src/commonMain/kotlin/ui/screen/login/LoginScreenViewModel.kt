@@ -1,12 +1,22 @@
 package ui.screen.login
 
+import androidx.compose.runtime.Composable
+import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.toResultOr
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
+import dev.tkhs.handaimanager.MR
 import domain.usecase.LoginUseCase
+import entities.Credential
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.Clock
+import util.TotpUtil
 
 class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
     data class UiState(
@@ -14,7 +24,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
         val password: String = "",
         val otpCode: String = "",
         val isLoading: Boolean = false,
-        val error: String = ""
+        val error: StringResource? = null
     )
 
     private val _uiState = MutableStateFlow(UiState())
@@ -45,47 +55,70 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
     suspend fun onStartLoginClicked() {
         return coroutineScope {
             _uiState.update { it.copy(isLoading = true) }
-            val res = loginUseCase.prepareForLogin()
-            _uiState.update { it.copy(isLoading = false) }
-            res.onSuccess { status ->
-                _uiState.update { it.copy(error = "") }
-                when(status){
-                    LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                    LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
-                    LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+
+            loginUseCase.prepareForLogin()
+                .also {
+                    _uiState.update { it.copy(isLoading = false) }
                 }
-            }
+                .onSuccess { status ->
+                    _uiState.update { it.copy(error = null) }
+                    when(status){
+                        LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
+                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+                    }
+                }
         }
     }
+
     suspend fun onAuthPasswordClicked() {
         return coroutineScope {
             _uiState.update { it.copy(isLoading = true) }
-            val res = loginUseCase.authPassword(uiState.value.userId,uiState.value.password)
-            _uiState.update { it.copy(isLoading = false) }
-            res.onSuccess {
-                _uiState.update { it.copy(error = "") }
-                when(it){
-                    LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                    LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
-                    LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+
+            loginUseCase.authPassword(uiState.value.userId,uiState.value.password)
+                .also {
+                    _uiState.update { it.copy(isLoading = false) }
                 }
-            }.onFailure { _uiState.update { it.copy(error = "Wrong userId or password.Or some error is occurred.") } }
+                .onSuccess{
+                    _uiState.update { it.copy(error = null) }
+                    when(it){
+                        LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
+                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+                    }
+                }.onFailure { _uiState.update { it.copy(error = MR.strings.screen_login_wrong_credentials) } }
         }
     }
 
     suspend fun onAuthOtpClicked() {
         return coroutineScope {
             _uiState.update { it.copy(isLoading = true) }
-            val res = loginUseCase.authOtp(uiState.value.otpCode)
-            _uiState.update { it.copy(isLoading = false) }
-            res.onSuccess {
-                _uiState.update { it.copy(error = "") }
-                when(it){
-                    LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                    LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
-                    LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
+
+            val secret = Regex("secret=([^&]+)").find(uiState.value.otpCode)?.groupValues?.get(1)
+
+            secret.toResultOr { Unit }
+                .map {
+                    TotpUtil.generateTotpCode(it, Clock.System.now().epochSeconds)
                 }
-            }.onFailure { _uiState.update { it.copy(error = "Wrong otp code.Or some error is occurred.") } }
+                .flatMap {
+                    loginUseCase.authOtp(it)
+                }
+                .also {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                .onSuccess { status ->
+                    _uiState.update { it.copy(error = null) }
+                    when(status){
+                        LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
+                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn(secret)
+                    }
+                }.onFailure { _uiState.update { it.copy(error = MR.strings.screen_login_wrong_otp_secret) } }
         }
+    }
+
+    private fun onLoggedIn(totpSecret:String? = null){
+        loginUseCase.saveCredential(Credential(uiState.value.userId,uiState.value.password,totpSecret))
+        onLoggedIn.invoke()
     }
 }

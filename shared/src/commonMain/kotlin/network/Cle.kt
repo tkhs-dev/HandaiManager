@@ -14,7 +14,10 @@ import com.github.michaelbull.result.toResultOr
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
-import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.statement.request
+import io.ktor.http.Cookie
+import io.ktor.http.setCookie
+import util.Logger
 
 class Cle(
     val cleApi: CleService =
@@ -46,10 +49,12 @@ class Cle(
             }
     }
 
-    suspend fun signinWithSso(authResult: Idp.AuthResult): Result<Unit,Unit>{
+    suspend fun signinWithSso(authResult: Idp.AuthResult): Result<Cookie,Unit>{
         val res = cleApi.authSamlSso(authResult.samlResponse,authResult.relayState?:"null")
         return if(res.headers.contains("location")){
-            Ok(Unit)
+            val c = res.request.setCookie()
+            Logger.error("TEST",c.joinToString { it.name })
+            Ok(res.setCookie().first { it.name == "BbRouter" })
         }else{
             Err(Unit)
         }

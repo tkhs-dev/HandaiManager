@@ -63,6 +63,10 @@ class NetworkModule {
                         }).request()
                     }
 
+                    override suspend fun refreshAuthPage() {
+
+                    }
+
                     override suspend fun authPassword(
                         userid: String,
                         password: String,
