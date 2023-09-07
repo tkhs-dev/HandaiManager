@@ -21,10 +21,10 @@ import util.Logger
 
 class Cle(
     val cleApi: CleService =
-        Ktorfit.Builder().httpClient(HttpClient(){
+        Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
             install(HttpCookies)
-        }).baseUrl(Cle.BASE_URL)
+        }).baseUrl(BASE_URL)
             .build()
             .create<CleService>()
 ){

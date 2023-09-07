@@ -20,7 +20,7 @@ fun main() = application {
     val lifecycle = LifecycleRegistry()
     val rootComponentContext = DefaultComponentContext(lifecycle = lifecycle)
 
-    startKoin() {
+    startKoin {
         modules(AppModule().appModule())
     }
 

@@ -1,13 +1,11 @@
 package ui.screen.login
 
-import androidx.compose.runtime.Composable
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.toResultOr
 import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.stringResource
 import dev.tkhs.handaimanager.MR
 import domain.usecase.LoginUseCase
 import entities.Credential
@@ -96,7 +94,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
 
             val secret = Regex("secret=([^&]+)").find(uiState.value.otpCode)?.groupValues?.get(1)
 
-            secret.toResultOr { Unit }
+            secret.toResultOr { }
                 .map {
                     TotpUtil.generateTotpCode(it, Clock.System.now().epochSeconds)
                 }

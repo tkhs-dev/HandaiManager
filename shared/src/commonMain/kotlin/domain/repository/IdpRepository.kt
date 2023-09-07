@@ -22,7 +22,7 @@ class IdpRepository(private val idpApi: Idp){
                         Ok(IdpStatus.SUCCESS)
                     }
                 }
-                .mapError { Unit }
+                .mapError { }
         }
     }
 
@@ -36,7 +36,7 @@ class IdpRepository(private val idpApi: Idp){
                         Ok(IdpStatus.SUCCESS)
                     }
                 }
-                .mapError { Unit }
+                .mapError { }
         }
     }
 
@@ -50,14 +50,14 @@ class IdpRepository(private val idpApi: Idp){
                         Ok(IdpStatus.NEED_OTP)
                     }
                 }
-                .mapError { Unit }
+                .mapError { }
         }
     }
 
     suspend fun login():Result<Idp.AuthResult,Unit>{
         return withContext(Dispatchers.IO){
             idpApi.roleSelect()
-                .mapError { Unit }
+                .mapError { }
         }
     }
 

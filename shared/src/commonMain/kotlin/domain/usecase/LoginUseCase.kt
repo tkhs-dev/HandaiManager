@@ -46,7 +46,7 @@ class LoginUseCase(
                     idpRepository.login()
                         .andThen { cleRepository.login(it) }
                         .map { LoginStatus.SUCCESS }
-                        .mapError { Unit }
+                        .mapError { }
                 else Ok(it)
             }
     }

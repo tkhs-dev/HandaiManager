@@ -11,7 +11,7 @@ class CredentialRepository {
         const val CREDENTIAL_FILE_NAME = "cred.bin"
     }
 
-    fun loadCredential(): entities.Credential? {
+    fun loadCredential(): Credential? {
         return FileUtil.loadFileEncrypted(CREDENTIAL_FILE_NAME)
             ?.decodeToString()
             ?.let { Json.decodeFromString<Credential>(it) }
@@ -24,7 +24,7 @@ class CredentialRepository {
             }
     }
 
-    fun saveCredential(credential: entities.Credential) {
+    fun saveCredential(credential: Credential) {
         val string = Json.encodeToString(credential)
         val z = FileUtil.saveFileEncrypted(CREDENTIAL_FILE_NAME, string.encodeToByteArray())
         if(z){

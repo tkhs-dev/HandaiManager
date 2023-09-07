@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
 class CleTest:KoinTest {
     @BeforeTest
     fun beforeTest(){
-        startKoin(){
+        startKoin {
             modules(
                 NetworkModule.getCleModule(true,true),
             )

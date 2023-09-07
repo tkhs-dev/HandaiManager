@@ -21,7 +21,7 @@ import io.ktor.client.statement.bodyAsText
  */
 class Idp(
     val idpApi: IdpService =
-        Ktorfit.Builder().httpClient(HttpClient(){
+        Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
             install(HttpCookies)
         }).baseUrl(BASE_URL)
@@ -99,7 +99,7 @@ class Idp(
      * 二段階認証を利用して認証
      */
     suspend fun authOtp(code: String): Result<AuthStatus, AuthError> {
-        val res = idpApi.authMfa(code);
+        val res = idpApi.authMfa(code)
         if(res.contains("認証エラー")){
             return Err(AuthError.WRONG_OTP_CODE)
         }else if(res.contains("利用者選択")){

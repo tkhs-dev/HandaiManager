@@ -15,7 +15,7 @@ import util.FileUtil
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        startKoin(){
+        startKoin {
             modules(AppModule().appModule())
         }
 

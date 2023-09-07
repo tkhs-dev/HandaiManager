@@ -9,7 +9,7 @@ import network.Idp
 class CleApiRepository(private val cle: Cle) {
     suspend fun getAuthRequest():Result<Idp.AuthRequestData,Unit>{
         return cle.getAuthRequestData()
-            .mapError { Unit }
+            .mapError { }
     }
 
     suspend fun login(authResult: Idp.AuthResult):Result<Cookie,Unit>{

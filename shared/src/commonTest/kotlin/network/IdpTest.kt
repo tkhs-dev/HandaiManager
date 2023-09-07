@@ -11,7 +11,7 @@ import kotlin.test.*
 class IdpTest: KoinTest{
     @BeforeTest
     fun beforeTest(){
-        startKoin(){
+        startKoin {
             modules(
                 NetworkModule.getIdpModule(true,true,true,true,true,true)
             )
