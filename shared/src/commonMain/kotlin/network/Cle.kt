@@ -29,7 +29,7 @@ class Cle(
             .create<CleService>()
 ){
     companion object {
-        val BASE_URL = "https://www.cle.osaka-u.ac.jp/"
+        const val BASE_URL = "https://www.cle.osaka-u.ac.jp/"
     }
     suspend fun getAuthRequestData():Result<Idp.AuthRequestData,ApiError>{
         return cleApi.getSamlRequest()

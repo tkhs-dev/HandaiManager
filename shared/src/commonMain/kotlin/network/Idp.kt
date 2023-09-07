@@ -29,7 +29,7 @@ class Idp(
             .create<IdpService>()
 ) {
     companion object{
-        val BASE_URL = "https://ou-idp.auth.osaka-u.ac.jp/"
+        const val BASE_URL = "https://ou-idp.auth.osaka-u.ac.jp/"
     }
 
     /**
