@@ -20,13 +20,13 @@ import io.ktor.http.setCookie
 import util.Logger
 
 class Cle(
-    val cleApi: CleService =
+    private val cleApi: CleService =
         Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
             install(HttpCookies)
         }).baseUrl(BASE_URL)
             .build()
-            .create<CleService>()
+            .create()
 ){
     companion object {
         const val BASE_URL = "https://www.cle.osaka-u.ac.jp/"
@@ -34,7 +34,7 @@ class Cle(
     suspend fun getAuthRequestData():Result<Idp.AuthRequestData,ApiError>{
         return cleApi.getSamlRequest()
             .toResultOr { ApiError.UNKNOWN }
-            .flatMap { it.headers[HttpHeaders.Location]?.let { Url(it).parameters }.toResultOr { ApiError.INVALID_RESPONSE } }
+            .flatMap { it.headers[HttpHeaders.Location]?.let { it -> Url(it).parameters }.toResultOr { ApiError.INVALID_RESPONSE } }
             .flatMap {
                 if(it["SAMLRequest"] == null || it["SigAlg"] == null || it["Signature"] == null) {
                     Err(ApiError.INVALID_RESPONSE)
@@ -73,5 +73,5 @@ interface CleService{
 
     @POST("auth-saml/saml/SSO")
     @FormUrlEncoded
-    suspend fun authSamlSso(@Field("SAMLResponse") samlResponse:String,@Field("RelayState") relayState:String?,@Field("button") button:String = "Send",): HttpResponse
+    suspend fun authSamlSso(@Field("SAMLResponse") samlResponse:String,@Field("RelayState") relayState:String?,@Field("button") button:String = "Send"): HttpResponse
 }

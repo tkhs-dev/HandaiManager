@@ -20,13 +20,13 @@ import io.ktor.client.statement.bodyAsText
  * 大阪大学のIDPでの認証を取り扱うクラス
  */
 class Idp(
-    val idpApi: IdpService =
+    private val idpApi: IdpService =
         Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
             install(HttpCookies)
         }).baseUrl(BASE_URL)
             .build()
-            .create<IdpService>()
+            .create()
 ) {
     companion object{
         const val BASE_URL = "https://ou-idp.auth.osaka-u.ac.jp/"
@@ -62,14 +62,14 @@ class Idp(
      */
     suspend fun tryUseCookie(authRequestData: AuthRequestData): Result<AuthStatus, AuthError> {
         val res = idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
-        if(res.status.value == 200){
+        return if(res.status.value == 200){
             if(res.bodyAsText().contains("利用者選択")){
-                return Ok(AuthStatus.SUCCESS)
+                Ok(AuthStatus.SUCCESS)
             }else{
-                return Ok(AuthStatus.NEED_CREDENTIALS)
+                Ok(AuthStatus.NEED_CREDENTIALS)
             }
         }else{
-            return Err(AuthError.FAILED)
+            Err(AuthError.FAILED)
         }
     }
 
@@ -100,12 +100,12 @@ class Idp(
      */
     suspend fun authOtp(code: String): Result<AuthStatus, AuthError> {
         val res = idpApi.authMfa(code)
-        if(res.contains("認証エラー")){
-            return Err(AuthError.WRONG_OTP_CODE)
+        return if(res.contains("認証エラー")){
+            Err(AuthError.WRONG_OTP_CODE)
         }else if(res.contains("利用者選択")){
-            return Ok(AuthStatus.SUCCESS)
+            Ok(AuthStatus.SUCCESS)
         }else{
-            return Err(AuthError.FAILED)
+            Err(AuthError.FAILED)
         }
     }
 

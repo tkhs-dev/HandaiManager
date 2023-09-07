@@ -97,7 +97,6 @@ fun LoginScreen() {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Information(viewModel: LoginScreenViewModel,onNext:()->Unit){
     val uiState by viewModel.uiState.collectAsState()

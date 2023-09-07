@@ -9,7 +9,6 @@ import domain.repository.CleApiRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
 import entities.Credential
-import util.Logger
 
 class LoginUseCase(
     private val idpRepository: IdpRepository,
@@ -44,7 +43,7 @@ class LoginUseCase(
             .andThen {
                 if (it == LoginStatus.SUCCESS)
                     idpRepository.login()
-                        .andThen { cleRepository.login(it) }
+                        .andThen { it -> cleRepository.login(it) }
                         .map { LoginStatus.SUCCESS }
                         .mapError { }
                 else Ok(it)

@@ -78,7 +78,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
                     _uiState.update { it.copy(isLoading = false) }
                 }
                 .onSuccess{
-                    _uiState.update { it.copy(error = null) }
+                    _uiState.update { it -> it.copy(error = null) }
                     when(it){
                         LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
                         LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()

@@ -1,7 +1,6 @@
 package util
 
 import com.google.common.io.BaseEncoding
-import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
 import java.security.Key
 import java.util.Locale

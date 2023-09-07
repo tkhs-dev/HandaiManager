@@ -54,12 +54,12 @@ fun HomeScreen() {
 
     val router: Router<HomeScreenPage> = rememberRouter(HomeScreenPage::class,listOf(HomeScreenPage.Dashboard))
 
-    val mainPageContent = setOf<PageContent>(
+    val mainPageContent = setOf(
         PageContent(Icons.Rounded.Home,"Dashboard",HomeScreenPage.Dashboard),
         PageContent(Icons.Outlined.DateRange,"Activity",HomeScreenPage.Activity),
         //PageContent(Icons.Outlined.Notifications,"Notifications",HomeScreenPage.Notifications),
     )
-    val preferencePageContent = setOf<PageContent>(
+    val preferencePageContent = setOf(
         PageContent(Icons.Outlined.Settings,"Settings",HomeScreenPage.Settings),
     )
 

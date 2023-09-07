@@ -12,7 +12,6 @@ import io.ktor.utils.io.ByteReadChannel
 import network.Cle
 import network.CleService
 import org.koin.core.module.Module
-import org.koin.dsl.ModuleDeclaration
 import org.koin.dsl.module
 
 class NetworkModule {

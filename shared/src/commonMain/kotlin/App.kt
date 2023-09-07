@@ -3,7 +3,6 @@ import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import ui.screen.RootScreen
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun App() {
     MaterialTheme {
