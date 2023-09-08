@@ -7,4 +7,5 @@ import com.arkivanov.essenty.parcelable.Parcelize
 sealed class Screen:Parcelable{
     object Home:Screen()
     object Login:Screen()
+    object Preference:Screen()
 }

@@ -9,10 +9,11 @@ import io.github.xxfast.decompose.router.rememberRouter
 import ui.Screen
 import ui.screen.home.HomeScreen
 import ui.screen.login.LoginScreen
+import ui.screen.preference.PreferenceScreen
 
 @Composable
 fun RootScreen() {
-    val router: Router<Screen> = rememberRouter(Screen::class,listOf(Screen.Login))
+    val router: Router<Screen> = rememberRouter(Screen::class,listOf(Screen.Preference))
     RoutedContent(
     router = router,
     animation = stackAnimation(fade()),
@@ -22,6 +23,8 @@ fun RootScreen() {
                 HomeScreen()
             Screen.Login ->
                 LoginScreen()
+            Screen.Preference ->
+                PreferenceScreen()
         }
     }
 }
