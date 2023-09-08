@@ -15,6 +15,7 @@ import io.github.xxfast.decompose.LocalComponentContext
 import io.kanro.compose.jetbrains.expui.theme.LightTheme
 import io.kanro.compose.jetbrains.expui.window.JBWindow
 import org.koin.core.context.GlobalContext.startKoin
+import java.awt.Dimension
 
 fun main() = application {
     val lifecycle = LifecycleRegistry()
@@ -40,6 +41,7 @@ fun main() = application {
             ) {
             }
         }) {
+        window.minimumSize = Dimension(800, 450)
         CompositionLocalProvider(LocalComponentContext provides rootComponentContext) {
             MaterialTheme {
                 MainView()
