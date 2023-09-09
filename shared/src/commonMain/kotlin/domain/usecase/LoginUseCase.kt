@@ -9,6 +9,7 @@ import domain.repository.CleApiRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
 import entities.Credential
+import util.Logger
 
 class LoginUseCase(
     private val idpRepository: IdpRepository,
@@ -24,6 +25,8 @@ class LoginUseCase(
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_OTP
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
                 }
+            }.mapError {
+                Logger.error(this::class.simpleName, it)
             }
     }
 
@@ -42,12 +45,11 @@ class LoginUseCase(
             }
             .andThen {
                 if (it == LoginStatus.SUCCESS)
-                    idpRepository.login()
-                        .andThen { it -> cleRepository.login(it) }
+                    idpRepository.roleSelect()
+                        .andThen { it -> cleRepository.signinWithSso(it) }
                         .map { LoginStatus.SUCCESS }
-                        .mapError { }
                 else Ok(it)
-            }
+            }.mapError {}
     }
 
     suspend fun authOtp(code: String): Result<LoginStatus, Unit> {
@@ -58,7 +60,7 @@ class LoginUseCase(
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_OTP
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
                 }
-            }
+            }.mapError { }
     }
 
     fun saveCredential(credential: Credential) {

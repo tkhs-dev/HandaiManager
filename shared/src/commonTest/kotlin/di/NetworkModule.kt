@@ -1,5 +1,7 @@
 package di
 
+import domain.repository.CleApiRepository
+import domain.repository.IdpRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -9,7 +11,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
-import network.Cle
 import network.CleService
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -18,7 +19,7 @@ class NetworkModule {
     companion object{
         fun getCleModule(successGetSamlRequest:Boolean,successAuthSamlSso:Boolean): Module {
             return module{
-                single { Cle(object: CleService {
+                single { CleApiRepository(object: CleService {
                     override suspend fun getSamlRequest(): HttpResponse {
                         return HttpClient(MockEngine{ request ->
                             respond(
@@ -26,7 +27,7 @@ class NetworkModule {
                                 status = HttpStatusCode.OK,
                                 headers = if(successGetSamlRequest) headersOf(HttpHeaders.Location,"https://www.cle.osaka-u.ac.jp/somedir?SAMLRequest=123&SigAlg=123&Signature=123") else headersOf()
                             )
-                        }).request()
+                        }){followRedirects=false}.request()
                     }
 
                     override suspend fun authSamlSso(
@@ -37,17 +38,17 @@ class NetworkModule {
                         return HttpClient(MockEngine{ request ->
                             respond(
                                 content = ByteReadChannel(""),
-                                status = HttpStatusCode.OK,
-                                headers = if(successAuthSamlSso) headersOf(HttpHeaders.Location,"") else headersOf()
+                                status = HttpStatusCode.Found,
+                                headers = if(successAuthSamlSso) headersOf(HttpHeaders.Location,"a") else headersOf()
                             )
-                        }).request()
+                        }){followRedirects = false}.request()
                     }
                 }) }
             }
         }
         fun getIdpModule(successConnectSsoSite:Boolean,needAuthPassword:Boolean,needAuthMfa:Boolean,successAuthPassword:Boolean,successAuthMfa:Boolean,successRoleSelect:Boolean): Module {
             return module{
-                single { network.Idp(object: network.IdpService {
+                single { IdpRepository(object: network.IdpService {
                     override suspend fun connectSsoSite(
                         samlRequest: String,
                         relayState: String?,

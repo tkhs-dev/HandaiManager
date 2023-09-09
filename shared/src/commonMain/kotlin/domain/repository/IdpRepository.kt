@@ -1,61 +1,139 @@
 package domain.repository
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.runCatching
+import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import network.Idp
+import network.ApiError
+import network.AuthRequestData
+import network.AuthResponseData
+import network.IdpService
+import util.Logger
 
-class IdpRepository(private val idpApi: Idp){
-    suspend fun prepareForLogin(authRequestData: Idp.AuthRequestData):Result<IdpStatus,Unit>{
+class IdpRepository(
+    private val idpApi: IdpService =
+        Ktorfit.Builder().httpClient(HttpClient {
+            followRedirects = false
+            install(HttpCookies)
+        }).baseUrl(IdpService.BASE_URL)
+            .build()
+            .create()
+):ApiRepository() {
+    suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): Result<AuthResponseData, ApiError> {
+        return prepareForLogin(authRequestData)
+            .andThen {
+                if(it == IdpStatus.NEED_CREDENTIALS){
+                    authPassword(userid, password)
+                }else{
+                    Ok(it)
+                }
+            }
+            .andThen {
+                if(it == IdpStatus.NEED_OTP){
+                    authOtp(code)
+                }else{
+                    Ok(it)
+                }
+            }
+            .flatMap { roleSelect() }
+    }
+
+    suspend fun prepareForLogin(authRequestData: AuthRequestData):Result<IdpStatus, ApiError>{
         return withContext(Dispatchers.IO){
-                idpApi.tryUseCookie(authRequestData)
-                .andThen {
-                    if(it == Idp.AuthStatus.NEED_CREDENTIALS){
-                        Ok(IdpStatus.NEED_CREDENTIALS)
+            tryCallApi {
+                idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
+            }
+                .flatMap{
+                    if(it.status.value == 200) {
+                        if(it.bodyAsText().contains("利用者選択")){
+                            Ok(IdpStatus.SUCCESS)
+                        }else{
+                            Ok(IdpStatus.NEED_CREDENTIALS)
+                        }
                     }else{
-                        Ok(IdpStatus.SUCCESS)
+                        Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
                     }
                 }
-                .mapError { }
         }
     }
 
-    suspend fun authPassword(userId:String,password:String):Result<IdpStatus,Unit>{
+    suspend fun authPassword(userId:String,password:String):Result<IdpStatus,ApiError>{
         return withContext(Dispatchers.IO){
-            idpApi.authPassword(userId,password)
-                .andThen {
-                    if(it == Idp.AuthStatus.NEED_OTP){
-                        Ok(IdpStatus.NEED_OTP)
-                    }else{
-                        Ok(IdpStatus.SUCCESS)
-                    }
+            runCatching {
+                idpApi.authPassword(userId,password)
+            }.onFailure {
+                Logger.error(this::class.simpleName, it)
+            }.mapError {
+                ApiError.InternalException(it)
+            }.andThen {
+                if (it.contains("認証エラー")) {
+                    idpApi.refreshAuthPage()
+                    Err(ApiError.WrongCredentials)
+                } else if (it.contains("MFA")) {
+                    Ok(IdpStatus.NEED_OTP)
+                } else if (it.contains("利用者選択")) {
+                    Ok(IdpStatus.SUCCESS)
+                } else {
+                    Err(ApiError.InvalidResponse(200, it))
                 }
-                .mapError { }
+            }
         }
     }
 
-    suspend fun authOtp(code:String):Result<IdpStatus,Unit>{
+    suspend fun authOtp(code:String):Result<IdpStatus,ApiError>{
         return withContext(Dispatchers.IO){
-            idpApi.authOtp(code)
-                .andThen {
-                    if(it == Idp.AuthStatus.SUCCESS){
-                        Ok(IdpStatus.SUCCESS)
-                    }else{
-                        Ok(IdpStatus.NEED_OTP)
-                    }
+            runCatching{
+                idpApi.authMfa(code)
+            }.onFailure {
+                Logger.error(this::class.simpleName, it)
+            }.mapError {
+                ApiError.InternalException(it)
+            }.andThen {
+                if(it.contains("認証エラー")){
+                    Err(ApiError.WrongCredentials)
+                }else if(it.contains("利用者選択")){
+                    Ok(IdpStatus.SUCCESS)
+                }else{
+                    Err(ApiError.InvalidResponse(200, it))
                 }
-                .mapError { }
+            }
         }
     }
 
-    suspend fun login():Result<Idp.AuthResult,Unit>{
+    suspend fun roleSelect():Result<AuthResponseData,ApiError>{
         return withContext(Dispatchers.IO){
-            idpApi.roleSelect()
-                .mapError { }
+            runCatching {
+                idpApi.roleSelect()
+            }.onFailure {
+                Logger.error(this::class.simpleName, it)
+            }.mapError {
+                ApiError.InternalException(it)
+            }.map {
+                val map = mutableMapOf<String, String>()
+                "name=\"([^\"]+)\"\\s*value=\"([^\"]+)\"".toRegex(RegexOption.IGNORE_CASE).findAll(it)
+                    .forEach {
+                            matchResult->
+                        val (name, value) = matchResult.destructured
+                        map[name] = value
+                    }
+                map
+            }.flatMap {
+                val samlResponse = it["SAMLResponse"] ?: return@flatMap Err(ApiError.InvalidResponse(200, "SAMLResponse not found"))
+                val relayState = it["RelayState"] ?: "null"
+                Ok(AuthResponseData(samlResponse,relayState))
+            }
         }
     }
 

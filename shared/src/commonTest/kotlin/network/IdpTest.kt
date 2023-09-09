@@ -1,12 +1,16 @@
 import com.github.michaelbull.result.get
 import di.NetworkModule
+import domain.repository.IdpRepository
 import kotlinx.coroutines.runBlocking
-import network.Idp
+import network.AuthRequestData
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import org.koin.test.get
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class IdpTest: KoinTest{
     @BeforeTest
@@ -24,9 +28,9 @@ class IdpTest: KoinTest{
 
     @Test
     fun testAuthenticate(){
-        val idp = get<Idp>()
+        val idp = get<IdpRepository>()
         val result = runBlocking {
-            idp.authenticate(Idp.AuthRequestData("123","123","123","123"),"123","123","123")
+            idp.authenticate(AuthRequestData("123","123","123","123"),"123","123","123")
         }
             .get()
         assertNotNull(result)
