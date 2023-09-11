@@ -1,4 +1,4 @@
-package ui.screen
+package ui
 
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
@@ -6,24 +6,23 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stac
 import io.github.xxfast.decompose.router.Router
 import io.github.xxfast.decompose.router.content.RoutedContent
 import io.github.xxfast.decompose.router.rememberRouter
-import ui.Screen
 import ui.screen.home.HomeScreen
 import ui.screen.login.LoginScreen
 import ui.screen.preference.PreferenceScreen
 
 @Composable
 fun RootScreen() {
-    val router: Router<Screen> = rememberRouter(Screen::class,listOf(Screen.Login))
+    val router: Router<RootStateModel> = rememberRouter(RootStateModel::class,listOf(RootStateModel.Login))
     RoutedContent(
     router = router,
     animation = stackAnimation(fade()),
     ) { screen ->
         when (screen) {
-            Screen.Home ->
+            RootStateModel.Home ->
                 HomeScreen()
-            Screen.Login ->
+            RootStateModel.Login ->
                 LoginScreen()
-            Screen.Preference ->
+            RootStateModel.Preference ->
                 PreferenceScreen()
         }
     }
