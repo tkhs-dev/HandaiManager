@@ -17,9 +17,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -39,14 +39,10 @@ import org.koin.core.component.inject
 import ui.screen.home.page.Activity
 import ui.screen.home.page.Dashboard
 import ui.screen.home.page.Settings
-import util.FileUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
-    FileUtil.saveFile("aaa.txt","Hello World".encodeToByteArray())
-    FileUtil.saveFileEncrypted("bbb.txt", "Hello World!!It's encrypted!".encodeToByteArray())
-
     val viewModel = remember{ object : KoinComponent {
         val viewModel: HomeScreenViewModel by inject() }
     }.viewModel
