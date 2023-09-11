@@ -3,7 +3,9 @@ package ui.screen.login
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -128,6 +130,7 @@ fun AuthPassword(viewModel: LoginScreenViewModel,onNext:()->Unit){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
+        Text(stringResource(MR.strings.ou_login), fontSize = 25.sp)
         TextField(
             value = uiState.userId,
             label = { Text(stringResource(MR.strings.ou_personal_id)) },
@@ -150,6 +153,7 @@ fun AuthPassword(viewModel: LoginScreenViewModel,onNext:()->Unit){
                 imeAction = ImeAction.Done,
             ),
         )
+        Spacer(modifier = Modifier.height(30.dp))
         Button(onClick = { onNext() }, modifier = Modifier.width(280.dp),enabled = !uiState.isLoading) {
             if(!uiState.isLoading)Text(stringResource(MR.strings.next))
             else CircularProgressIndicator(modifier =  Modifier.size(20.dp))

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <string name="ou_login">大阪大学ログイン</string>
-    <string name="ou_personal_id">大阪大学個人ID</string>
+    <string name="ou_personal_id">個人ID</string>
     <string name="ou_password">パスワード</string>
     <string name="ou_otp">ワンタイムパスワード生成鍵</string>
 
