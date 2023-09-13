@@ -62,8 +62,10 @@ class IdpRepository(
                 idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
             }
                 .flatMap{
+                    Logger.debug(this::class.simpleName, it.request.headers)
                     if(it.status.value == 200) {
                         if(it.bodyAsText().contains("利用者選択")){
+                            Logger.debug(this::class.simpleName, "Pass idp auth with saved cookies")
                             Ok(IdpStatus.SUCCESS)
                         }else{
                             Ok(IdpStatus.NEED_CREDENTIALS)
@@ -138,6 +140,7 @@ class IdpRepository(
             }.flatMap {
                 val samlResponse = it["SAMLResponse"] ?: return@flatMap Err(ApiError.InvalidResponse(200, "SAMLResponse not found"))
                 val relayState = it["RelayState"] ?: "null"
+                Logger.info(this::class.simpleName, "OU idp login successful")
                 Ok(AuthResponseData(samlResponse,relayState))
             }
         }
