@@ -1,7 +1,6 @@
 package ui.screen.login
 
 import com.github.michaelbull.result.flatMap
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.toResultOr
@@ -13,8 +12,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.datetime.Clock
-import util.TotpUtil
 
 class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
     data class UiState(
@@ -62,7 +59,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
                     _uiState.update { it.copy(error = null) }
                     when(status){
                         LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.NEED_MFA -> onNeedOtp()
                         LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
                     }
                 }
@@ -78,10 +75,10 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
                     _uiState.update { it.copy(isLoading = false) }
                 }
                 .onSuccess{
-                    _uiState.update { it -> it.copy(error = null) }
+                    _uiState.update { it.copy(error = null) }
                     when(it){
                         LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.NEED_MFA -> onNeedOtp()
                         LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn()
                     }
                 }.onFailure { _uiState.update { it.copy(error = MR.strings.screen_login_wrong_credentials) } }
@@ -95,11 +92,8 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
             val secret = Regex("secret=([^&]+)").find(uiState.value.otpCode)?.groupValues?.get(1)
 
             secret.toResultOr { }
-                .map {
-                    TotpUtil.generateTotpCode(it, Clock.System.now().epochSeconds)
-                }
                 .flatMap {
-                    loginUseCase.authOtp(it)
+                    loginUseCase.authWithOtpSecret(it)
                 }
                 .also {
                     _uiState.update { it.copy(isLoading = false) }
@@ -108,7 +102,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
                     _uiState.update { it.copy(error = null) }
                     when(status){
                         LoginUseCase.LoginStatus.NEED_CREDENTIALS -> onNeedPassword()
-                        LoginUseCase.LoginStatus.NEED_OTP -> onNeedOtp()
+                        LoginUseCase.LoginStatus.NEED_MFA -> onNeedOtp()
                         LoginUseCase.LoginStatus.SUCCESS -> onLoggedIn(secret)
                     }
                 }.onFailure { _uiState.update { it.copy(error = MR.strings.screen_login_wrong_otp_secret) } }
