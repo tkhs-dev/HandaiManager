@@ -54,8 +54,8 @@ kotlin {
                 implementation("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-beta-01")
 
-                implementation("io.insert-koin:koin-core:3.4.2")
-                implementation("io.insert-koin:koin-test:3.4.1")
+                implementation("io.insert-koin:koin-core:3.4.3")
+                implementation("io.insert-koin:koin-test:3.4.3")
 
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
