@@ -59,7 +59,7 @@ kotlin {
 
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
                 implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
 
 
