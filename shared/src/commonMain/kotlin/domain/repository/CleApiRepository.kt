@@ -7,6 +7,7 @@ import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.toResultOr
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
@@ -19,12 +20,16 @@ import network.ApiError
 import network.AuthRequestData
 import network.AuthResponseData
 import network.CleService
+import util.FileCookiesStorage
 
 class CleApiRepository(
+    private val fileCookiesStorage: FileCookiesStorage? = null,
     private val cleApi: CleService =
         Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
-            install(HttpCookies)
+            install(HttpCookies){
+                storage = fileCookiesStorage ?: AcceptAllCookiesStorage()
+            }
         }).baseUrl(CleService.BASE_URL)
             .build()
             .create()
@@ -34,7 +39,7 @@ class CleApiRepository(
             tryCallApi {
                 cleApi.getSamlRequest()
             }.flatMap {
-                it.headers[HttpHeaders.Location]?.let { it -> Url(it).parameters }
+                it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
                     .toResultOr { ApiError.InvalidResponse(it.status.value, it.bodyAsText()) }
             }.flatMap {
                 if (it["SAMLRequest"] == null || it["SigAlg"] == null || it["Signature"] == null) {

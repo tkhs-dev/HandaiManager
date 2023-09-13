@@ -11,8 +11,10 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -20,13 +22,17 @@ import network.ApiError
 import network.AuthRequestData
 import network.AuthResponseData
 import network.IdpService
+import util.FileCookiesStorage
 import util.Logger
 
 class IdpRepository(
+    private val fileCookiesStorage: FileCookiesStorage? = null,
     private val idpApi: IdpService =
         Ktorfit.Builder().httpClient(HttpClient {
             followRedirects = false
-            install(HttpCookies)
+            install(HttpCookies){
+                storage = fileCookiesStorage ?: AcceptAllCookiesStorage()
+            }
         }).baseUrl(IdpService.BASE_URL)
             .build()
             .create()
