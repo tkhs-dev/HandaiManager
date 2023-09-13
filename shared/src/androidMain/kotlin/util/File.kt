@@ -23,7 +23,7 @@ actual object FileUtil{
         val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
         val key = getAesKey() as Key
         cipher.init(Cipher.ENCRYPT_MODE, key)
-        saveFile("iv.bin",cipher.iv)
+        saveFile("${fileName}_iv.bin",cipher.iv)
         val encrypted = cipher.doFinal(data)
         return saveFile(fileName, encrypted)
     }
@@ -37,7 +37,7 @@ actual object FileUtil{
     actual fun loadFileEncrypted(fileName: String): ByteArray? {
         val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
         val key = getAesKey() as Key
-        cipher.init(Cipher.DECRYPT_MODE, key, IvParameterSpec(loadFile("iv.bin") ?: ByteArray(16)))
+        cipher.init(Cipher.DECRYPT_MODE, key, IvParameterSpec(loadFile("${fileName}_iv.bin") ?: ByteArray(16)))
         return loadFile(fileName)?.let { cipher.doFinal(it) }
     }
 }
