@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     kotlin("multiplatform")
     id("com.android.application")
@@ -39,6 +41,13 @@ android {
     }
     kotlin {
         jvmToolchain(17)
+    }
+
+    //ToDo: this packaging option should be removed when kotlin datetime lib is updated
+    packaging{
+        resources{
+            excludes.add("META-INF/versions/9/previous-compilation-data.bin")
+        }
     }
 }
 dependencies {

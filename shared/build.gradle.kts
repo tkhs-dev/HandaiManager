@@ -60,6 +60,8 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+                implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
+
 
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
