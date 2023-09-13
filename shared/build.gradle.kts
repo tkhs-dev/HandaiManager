@@ -84,7 +84,7 @@ kotlin {
             dependencies {
                 api("androidx.activity:activity-compose:1.7.2")
                 api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.9.0")
+                api("androidx.core:core-ktx:1.12.0")
                 implementation("commons-codec:commons-codec:1.16.0")
                 implementation("com.google.guava:guava:32.1.2-android")
             }
