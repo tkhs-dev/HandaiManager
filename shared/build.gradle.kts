@@ -10,6 +10,7 @@ plugins {
     id("dev.icerock.mobile.multiplatform-resources")
     id("com.palantir.git-version") version "3.0.0"
     id("com.github.gmazzo.buildconfig") version "4.1.2"
+    id("com.mikepenz.aboutlibraries.plugin") version "10.8.3"
 }
 
 val ktorVersion = "2.3.1"

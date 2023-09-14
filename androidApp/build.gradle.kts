@@ -4,6 +4,7 @@ plugins {
     kotlin("multiplatform")
     id("com.android.application")
     id("org.jetbrains.compose")
+    id("com.mikepenz.aboutlibraries.plugin") version "10.8.3"
 }
 
 kotlin {

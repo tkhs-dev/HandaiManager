@@ -3,6 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("com.github.hierynomus.license") version "0.16.1"
+    id("com.mikepenz.aboutlibraries.plugin") version "10.8.3"
 }
 
 kotlin {
