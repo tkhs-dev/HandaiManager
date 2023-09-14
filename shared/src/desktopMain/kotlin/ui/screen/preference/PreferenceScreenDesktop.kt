@@ -30,10 +30,10 @@ actual fun PreferenceScreen(onNavigateToLicense: () -> Unit) {
     Row{
         Box(modifier = Modifier.weight(1f))
         Column(modifier = Modifier.widthIn(400.dp,600.dp), verticalArrangement = Arrangement.spacedBy(20.dp)){
-            ConfigSection(title = "一般"){
+            ConfigSection(title = stringResource(MR.strings.screen_preference_general)){
             }
             Divider()
-            ConfigSection(title = "デバッグ"){
+            ConfigSection(title = stringResource(MR.strings.screen_preference_debug)){
                 versionInfo()
             }
             ConfigSection(title = stringResource(MR.strings.screen_preference_information)){
