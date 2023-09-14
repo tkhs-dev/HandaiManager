@@ -32,4 +32,7 @@
     <string name="screen_preference_debug">デバッグ</string>
     <string name="screen_preference_information">情報</string>
     <string name="oss_license">OSSのライセンス表記</string>
+    <string name="screen_preference_build">ビルド情報</string>
+    <string name="screen_preference_build_version">バージョン</string>
+    <string name="screen_preference_build_date">ビルド日時</string>
 </resources>

@@ -22,6 +22,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.icerock.moko.resources.compose.stringResource
+import dev.tkhs.handaimanager.MR
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -72,8 +74,8 @@ fun BooleanElement(title: String, description:String, value: Boolean, onValueCha
 @Composable
 fun versionInfo(){
     Column(modifier = Modifier.padding(0.dp,10.dp)) {
-        Text(text = "ビルド情報", style = STYLE_DESCRIPTION)
-        Text(text = "バージョン: ${BuildConfig.APP_VERSION}", style = STYLE_DESCRIPTION)
-        Text(text = "ビルド日時: ${Instant.fromEpochMilliseconds(BuildConfig.BUILD_TIME).toLocalDateTime(TimeZone.UTC)}", style = STYLE_DESCRIPTION)
+        Text(text = stringResource(MR.strings.screen_preference_build), style = STYLE_DESCRIPTION)
+        Text(text = "${stringResource(MR.strings.screen_preference_build_version)}: ${BuildConfig.APP_VERSION}", style = STYLE_DESCRIPTION)
+        Text(text = "${stringResource(MR.strings.screen_preference_build_date)}: ${Instant.fromEpochMilliseconds(BuildConfig.BUILD_TIME).toLocalDateTime(TimeZone.UTC)}", style = STYLE_DESCRIPTION)
     }
 }
