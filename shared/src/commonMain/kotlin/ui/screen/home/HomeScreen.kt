@@ -42,7 +42,7 @@ import ui.screen.home.page.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onNavigateToPreference: () -> Unit = {  }) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: HomeScreenViewModel by inject() }
     }.viewModel
@@ -76,7 +76,7 @@ fun HomeScreen() {
                 for (page in preferencePageContent){
                     NavigationDrawerItem(icon={Icon(page.icon,page.text)}, label = { Text(page.text) }, selected = uiState.value.selectedPage == page.page, onClick = {
                         viewModel.onNavigationDrawerClicked(page.page)
-                        router.bringToFront(page.page)
+                        onNavigateToPreference()
                     },shape = RoundedCornerShape(10.dp), modifier = modifier, colors = colors)                }
             }
         },
