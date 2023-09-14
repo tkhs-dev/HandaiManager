@@ -8,6 +8,8 @@ plugins {
     id("com.google.devtools.ksp") version "1.8.20-1.0.11"
     id("de.jensklingenberg.ktorfit") version "1.0.0"
     id("dev.icerock.mobile.multiplatform-resources")
+    id("com.palantir.git-version") version "3.0.0"
+    id("com.github.gmazzo.buildconfig") version "4.1.2"
 }
 
 val ktorVersion = "2.3.1"
@@ -15,6 +17,15 @@ val ktorfitVersion = "1.4.3"
 
 configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
     version = ktorfitVersion
+}
+
+val gitVersion: groovy.lang.Closure<String> by extra
+version = gitVersion()
+
+buildConfig {
+    buildConfigField("String", "APP_NAME", "\"${project.name}\"")
+    buildConfigField("String", "APP_VERSION", provider { "\"${version}\"" })
+    buildConfigField("long", "BUILD_TIME", "${System.currentTimeMillis()}L")
 }
 
 kotlin {
