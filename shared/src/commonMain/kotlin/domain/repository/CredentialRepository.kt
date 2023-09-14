@@ -1,6 +1,6 @@
 package domain.repository
 
-import entities.Credential
+import model.Credential
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import util.FileUtil

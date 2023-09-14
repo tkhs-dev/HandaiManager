@@ -11,7 +11,7 @@ import com.github.michaelbull.result.toResultOr
 import domain.repository.CleApiRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
-import entities.Credential
+import model.Credential
 import kotlinx.datetime.Clock
 import util.Logger
 import util.TotpUtil

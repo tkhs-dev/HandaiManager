@@ -7,7 +7,7 @@ import com.github.michaelbull.result.toResultOr
 import dev.icerock.moko.resources.StringResource
 import dev.tkhs.handaimanager.MR
 import domain.usecase.LoginUseCase
-import entities.Credential
+import model.Credential
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
