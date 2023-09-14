@@ -11,6 +11,7 @@ import com.arkivanov.decompose.defaultComponentContext
 import di.AppModule
 import io.github.xxfast.decompose.LocalComponentContext
 import org.koin.core.context.startKoin
+import util.ContextUtil
 import util.FileUtil
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         super.onCreate(savedInstanceState)
+        ContextUtil.mContext = this
+
         FileUtil.filesDir = applicationContext.filesDir
         val rootComponentContext: DefaultComponentContext = defaultComponentContext()
         setContent {
