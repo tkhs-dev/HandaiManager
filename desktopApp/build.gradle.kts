@@ -19,7 +19,6 @@ kotlin {
                 implementation("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-beta-01")
                 implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.0.0")
-                //implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
             }
         }
     }
