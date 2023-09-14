@@ -1,4 +1,4 @@
 package ui.screen.preference
 
-actual fun PreferenceScreen() {
+actual fun PreferenceScreen(onNavigateToLicense: () -> Unit) {
 }

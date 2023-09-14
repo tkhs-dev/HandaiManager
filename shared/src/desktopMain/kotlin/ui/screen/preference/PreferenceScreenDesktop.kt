@@ -6,17 +6,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.stringResource
+import dev.tkhs.handaimanager.MR
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Composable
-actual fun PreferenceScreen() {
+actual fun PreferenceScreen(onNavigateToLicense: () -> Unit) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: PreferenceScreenDesktopViewModel by inject() }
     }.viewModel
@@ -31,6 +35,11 @@ actual fun PreferenceScreen() {
             Divider()
             ConfigSection(title = "デバッグ"){
                 versionInfo()
+            }
+            ConfigSection(title = stringResource(MR.strings.screen_preference_information)){
+                TextButton(onClick = onNavigateToLicense) {
+                    Text(stringResource(MR.strings.oss_license))
+                }
             }
         }
         Box(modifier = Modifier.weight(1f))

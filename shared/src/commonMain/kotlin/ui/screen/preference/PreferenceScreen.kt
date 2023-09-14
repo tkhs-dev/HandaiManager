@@ -30,7 +30,7 @@ private val STYLE_TITLE = TextStyle(fontSize = 20.sp)
 private val STYLE_DESCRIPTION = TextStyle(fontSize = 15.sp)
 
 @Composable
-expect fun PreferenceScreen()
+expect fun PreferenceScreen(onNavigateToLicense: () -> Unit)
 
 @Composable
 fun ConfigSection(title:String, content : @Composable () -> Unit){

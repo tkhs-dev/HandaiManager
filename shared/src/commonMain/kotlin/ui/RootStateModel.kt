@@ -9,4 +9,5 @@ sealed class RootStateModel:Parcelable{
     object Home:RootStateModel()
     object Login:RootStateModel()
     object Preference:RootStateModel()
+    object License:RootStateModel()
 }

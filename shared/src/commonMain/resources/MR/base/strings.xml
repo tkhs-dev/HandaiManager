@@ -28,4 +28,5 @@
     </string>
     <string name="screen_login_otp_howto_get_key">鍵を入手する方法</string>
     <string name="screen_login_otp_howto_get_key_url">https://github.com/tkhs-dev/HandaiManager</string>
+    <string name="oss_license">OSSのライセンス表記</string>
 </resources>
