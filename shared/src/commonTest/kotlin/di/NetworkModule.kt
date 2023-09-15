@@ -2,6 +2,7 @@ package di
 
 import domain.repository.CleRepository
 import domain.repository.IdpRepository
+import domain.repository.KoanRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -12,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
 import network.CleService
+import network.KoanService
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -46,6 +48,37 @@ class NetworkModule {
                 }) }
             }
         }
+
+        fun getKoanModule(successGetSamlRequest:Boolean,successAuthSamlSso:Boolean): Module {
+            return module{
+                single { KoanRepository(koanApi = object: KoanService {
+                    override suspend fun getSamlRequest(): HttpResponse {
+                        return HttpClient(MockEngine{ request ->
+                            respond(
+                                content = ByteReadChannel(""),
+                                status = HttpStatusCode.OK,
+                                headers = if(successGetSamlRequest) headersOf(HttpHeaders.Location,"https://www.koan.osaka-u.ac.jp/somedir?SAMLRequest=123&SigAlg=123&Signature=123") else headersOf()
+                            )
+                        }){followRedirects=false}.request()
+                    }
+
+                    override suspend fun authSamlSso(
+                        samlResponse: String,
+                        relayState: String?,
+                        button: String
+                    ): HttpResponse {
+                        return HttpClient(MockEngine{ request ->
+                            respond(
+                                content = ByteReadChannel(""),
+                                status = HttpStatusCode.Found,
+                                headers = if(successAuthSamlSso) headersOf(HttpHeaders.Location,"a") else headersOf()
+                            )
+                        }){followRedirects = false}.request()
+                    }
+                }) }
+            }
+        }
+
         fun getIdpModule(successConnectSsoSite:Boolean,needAuthPassword:Boolean,needAuthMfa:Boolean,successAuthPassword:Boolean,successAuthMfa:Boolean,successRoleSelect:Boolean): Module {
             return module{
                 single { IdpRepository(idpApi = object: network.IdpService {
