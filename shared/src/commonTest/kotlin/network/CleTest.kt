@@ -2,7 +2,7 @@ package network
 
 import com.github.michaelbull.result.get
 import di.NetworkModule
-import domain.repository.CleApiRepository
+import domain.repository.CleRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -30,7 +30,7 @@ class CleTest:KoinTest {
     }
     @Test
     fun testGetAuthRequestData() {
-        val cle = get<CleApiRepository>()
+        val cle = get<CleRepository>()
         val res = runBlocking {
             cle.getAuthRequest()
         }
@@ -38,7 +38,7 @@ class CleTest:KoinTest {
     }
     @Test
     fun testLogin(){
-        val cle = get<CleApiRepository>()
+        val cle = get<CleRepository>()
         val res = runBlocking {
             cle.signinWithSso(AuthResponseData("123","123"))
         }

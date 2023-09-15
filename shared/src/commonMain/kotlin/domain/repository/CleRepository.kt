@@ -22,7 +22,7 @@ import network.AuthResponseData
 import network.CleService
 import util.FileCookiesStorage
 
-class CleApiRepository(
+class CleRepository(
     private val fileCookiesStorage: FileCookiesStorage? = null,
     private val cleApi: CleService =
         Ktorfit.Builder().httpClient(HttpClient {

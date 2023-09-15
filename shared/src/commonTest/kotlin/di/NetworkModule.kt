@@ -1,6 +1,6 @@
 package di
 
-import domain.repository.CleApiRepository
+import domain.repository.CleRepository
 import domain.repository.IdpRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -19,7 +19,7 @@ class NetworkModule {
     companion object{
         fun getCleModule(successGetSamlRequest:Boolean,successAuthSamlSso:Boolean): Module {
             return module{
-                single { CleApiRepository(object: CleService {
+                single { CleRepository(cleApi = object: CleService {
                     override suspend fun getSamlRequest(): HttpResponse {
                         return HttpClient(MockEngine{ request ->
                             respond(
@@ -48,7 +48,7 @@ class NetworkModule {
         }
         fun getIdpModule(successConnectSsoSite:Boolean,needAuthPassword:Boolean,needAuthMfa:Boolean,successAuthPassword:Boolean,successAuthMfa:Boolean,successRoleSelect:Boolean): Module {
             return module{
-                single { IdpRepository(object: network.IdpService {
+                single { IdpRepository(idpApi = object: network.IdpService {
                     override suspend fun connectSsoSite(
                         samlRequest: String,
                         relayState: String?,

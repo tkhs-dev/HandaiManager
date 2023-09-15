@@ -1,6 +1,6 @@
 package di
 
-import domain.repository.CleApiRepository
+import domain.repository.CleRepository
 import domain.repository.ConfigRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
@@ -17,7 +17,7 @@ import util.FileCookiesStorage
 val commonModule = module{
     single { FileCookiesStorage() }
     single{IdpRepository(fileCookiesStorage = get())}
-    single{CleApiRepository(fileCookiesStorage = get())}
+    single{CleRepository(fileCookiesStorage = get())}
     single { CredentialRepository() }
     single { ConfigRepository() }
     single { LicensesRepository() }

@@ -8,7 +8,7 @@ import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.toResultOr
-import domain.repository.CleApiRepository
+import domain.repository.CleRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
 import model.Credential
@@ -18,7 +18,7 @@ import util.TotpUtil
 
 class LoginUseCase(
     private val idpRepository: IdpRepository,
-    private val cleRepository: CleApiRepository,
+    private val cleRepository: CleRepository,
     private val credentialRepository: CredentialRepository
 ) {
     suspend fun prepareForLogin(): Result<LoginStatus, Unit> {
