@@ -106,7 +106,7 @@ data class CookieSerializable(val name:String, val value:String, val encoding: C
     }
 
     fun toCookie(): Cookie{
-        return Cookie(name,value,CookieEncoding.URI_ENCODING,maxAge, GMTDate(expires?.epochSeconds),domain,path,secure,httpOnly,extensions)
+        return Cookie(name,value,CookieEncoding.URI_ENCODING,maxAge, expires?.epochSeconds?.let{GMTDate(it)},domain,path,secure,httpOnly,extensions)
     }
 }
 
