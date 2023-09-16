@@ -74,7 +74,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
                 implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
 
-
                 implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
 
@@ -82,6 +81,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
+
+                implementation("org.drewcarlson:ktsoup-core:0.3.0")
 
                 implementation("dev.icerock.moko:resources:0.23.0")
                 implementation("dev.icerock.moko:resources-compose:0.23.0")

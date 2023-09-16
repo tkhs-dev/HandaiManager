@@ -75,6 +75,21 @@ class NetworkModule {
                             )
                         }){followRedirects = false}.request()
                     }
+
+                    override suspend fun getRishuPage(): HttpResponse {
+                        TODO("Not yet implemented")
+                    }
+
+                    override suspend fun getTimeTable(): HttpResponse {
+                        TODO("Not yet implemented")
+                    }
+
+                    override suspend fun getTimeTableByTerm(
+                        flowExecutionKey: String,
+                        gakkiKbnCode: Int
+                    ): HttpResponse {
+                        TODO("Not yet implemented")
+                    }
                 }) }
             }
         }

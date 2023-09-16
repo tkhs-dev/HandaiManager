@@ -36,7 +36,7 @@ class CleRepository(
 ) : ApiRepository(), SSOApiRepository {
     override suspend fun getAuthRequest(): Result<AuthRequestData, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi {
+            tryCallApi(ignoreAuthError = true) {
                 cleApi.getSamlRequest()
             }.flatMap {
                 it.headers[HttpHeaders.Location]?.let { Url(it).parameters }

@@ -4,23 +4,30 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.toErrorIfNull
 import com.github.michaelbull.result.toResultOr
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
+import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import model.TimeTable
 import network.ApiError
 import network.AuthRequestData
 import network.AuthResponseData
 import network.KoanService
 import util.FileCookiesStorage
+import util.HtmlUtil
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class KoanRepository(
     private val fileCookiesStorage: FileCookiesStorage? = null,
@@ -32,11 +39,20 @@ class KoanRepository(
             }
         }).baseUrl(KoanService.BASE_URL)
             .build()
+            .create(),
+    private val koanApiRedirectable: KoanService =
+        Ktorfit.Builder().httpClient(HttpClient {
+            followRedirects = true
+            install(HttpCookies){
+                storage = fileCookiesStorage ?: AcceptAllCookiesStorage()
+            }
+        }).baseUrl(KoanService.BASE_URL)
+            .build()
             .create()
 ): ApiRepository(), SSOApiRepository {
     override suspend fun getAuthRequest(): Result<AuthRequestData, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi {
+            tryCallApi(ignoreAuthError = true) {
                 koanApi.getSamlRequest()
             }.flatMap {
                 it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
@@ -70,6 +86,43 @@ class KoanRepository(
                     Ok(Unit)
                 } else {
                     Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                }
+            }
+        }
+    }
+
+    @OptIn(InternalAPI::class, ExperimentalEncodingApi::class)
+    suspend fun getTimeTable(term:TimeTable.Term, year:Int):Result<TimeTable,ApiError>{
+        koanApiRedirectable.getRishuPage()
+        return withContext(Dispatchers.IO){
+            tryCallApi {
+                koanApiRedirectable.getTimeTable()
+            }.flatMap {
+                val body = it.bodyAsText()
+                val nterm = Regex("""(\d{4})年度　(春学期|夏学期|秋学期|冬学期)""").find(body)
+                    ?.groupValues?.get(2)?.let { TimeTable.Term.fromJpText(it) }
+                    ?: return@flatMap Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                if(nterm == term){
+                   Ok(it)
+                }else{
+                    val fekey = it.request.url.parameters["_flowExecutionKey"] ?: return@flatMap Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                    val gakkiKbnCode = when(term){
+                        TimeTable.Term.SPRING -> 3
+                        TimeTable.Term.SUMMER -> 4
+                        TimeTable.Term.AUTUMN -> 5
+                        TimeTable.Term.WINTER -> 6
+                    }
+                    tryCallApi{
+                        koanApiRedirectable.getTimeTableByTerm(fekey, gakkiKbnCode)
+                    }
+                }
+            }.flatMap {
+                com.github.michaelbull.result.runCatching {
+                    HtmlUtil.parseTimeTable(it.bodyAsText())
+                }.mapError {
+                    ApiError.ParseError(it.message)
+                }.toErrorIfNull {
+                    ApiError.ParseError(null)
                 }
             }
         }

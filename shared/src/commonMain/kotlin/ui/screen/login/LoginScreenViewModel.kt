@@ -51,7 +51,7 @@ class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
         return coroutineScope {
             _uiState.update { it.copy(isLoading = true) }
 
-            loginUseCase.prepareForLogin()
+            loginUseCase.prepareForLoginCle()
                 .also {
                     _uiState.update { it.copy(isLoading = false) }
                 }

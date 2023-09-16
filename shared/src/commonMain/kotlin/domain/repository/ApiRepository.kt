@@ -16,6 +16,7 @@ import util.Logger
 
 abstract class ApiRepository {
     protected suspend inline fun tryCallApi(
+        ignoreAuthError:Boolean = false,
         onCatchException: (Throwable) -> Unit = {},
         onResponseFailure: (HttpResponse) -> Unit = {},
         block: () -> HttpResponse
@@ -29,10 +30,18 @@ abstract class ApiRepository {
             ApiError.InternalException(it)
         }.flatMap {
             if (it.status.isSuccess() || it.status== HttpStatusCode.Found) {
-                Ok(it)
+                if(it.headers["Location"]?.contains("sso_redirect") == true && !ignoreAuthError ){
+                    Err(ApiError.AuthError)
+                }else{
+                    Ok(it)
+                }
             } else {
                 onResponseFailure(it)
-                Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                if(it.status == HttpStatusCode.Unauthorized){
+                    Err(ApiError.AuthError)
+                } else{
+                    Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                }
             }
         }
     }

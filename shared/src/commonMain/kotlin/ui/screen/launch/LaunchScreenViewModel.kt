@@ -18,7 +18,7 @@ class LaunchScreenViewModel(private val fileCookiesStorage: FileCookiesStorage, 
     suspend fun onLaunched(){
         Logger.debug(this::class.simpleName, "onLaunched")
         fileCookiesStorage.loadCookies()
-        loginUseCase.loginWithSavedCredential()
+        loginUseCase.loginCleWithSavedCredential()
             .onFailure {
                 Logger.info(this::class.simpleName, "login failed: navigate to login screen")
                 onNavigateToLogin()

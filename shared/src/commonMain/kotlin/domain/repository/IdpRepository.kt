@@ -58,7 +58,7 @@ class IdpRepository(
 
     suspend fun prepareForLogin(authRequestData: AuthRequestData):Result<IdpStatus, ApiError>{
         return withContext(Dispatchers.IO){
-            tryCallApi {
+            tryCallApi(ignoreAuthError = true) {
                 idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
             }
                 .flatMap{

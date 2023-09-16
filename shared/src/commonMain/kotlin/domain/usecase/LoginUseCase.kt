@@ -11,6 +11,8 @@ import com.github.michaelbull.result.toResultOr
 import domain.repository.CleRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
+import domain.repository.KoanRepository
+import domain.repository.SSOApiRepository
 import model.Credential
 import kotlinx.datetime.Clock
 import util.Logger
@@ -19,10 +21,11 @@ import util.TotpUtil
 class LoginUseCase(
     private val idpRepository: IdpRepository,
     private val cleRepository: CleRepository,
+    private val koanRepository: KoanRepository,
     private val credentialRepository: CredentialRepository
 ) {
-    suspend fun prepareForLogin(): Result<LoginStatus, Unit> {
-        return cleRepository.getAuthRequest()
+    private suspend fun prepareForLogin(apiRepo:SSOApiRepository): Result<LoginStatus, Unit>{
+        return apiRepo.getAuthRequest()
             .andThen { idpRepository.prepareForLogin(it) }
             .map {
                 when (it) {
@@ -35,33 +38,57 @@ class LoginUseCase(
             }
     }
 
-    suspend fun loginWithSavedCredential(): Result<Unit, Unit> {
+    suspend fun prepareForLoginCle(): Result<LoginStatus, Unit> {
+        return prepareForLogin(cleRepository)
+    }
+
+    suspend fun prepareForLoginKoan(): Result<LoginStatus, Unit> {
+        return prepareForLogin(koanRepository)
+    }
+
+    suspend fun loginCleWithSavedCredential(): Result<Unit, Unit> {
         return credentialRepository.loadCredential()
             .toResultOr {  }
             .flatMap {
-                login(it)
+                loginCle(it)
             }
     }
 
-    suspend fun login(credential: Credential): Result<Unit, Unit> {
-        return prepareForLogin()
+    suspend fun loginKoanWithSavedCredential(): Result<Unit, Unit> {
+        return credentialRepository.loadCredential()
+            .toResultOr {  }
             .flatMap {
-                when (it) {
-                    LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
-                    LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
-                    LoginStatus.SUCCESS -> Ok(it)
-                }
-            }.flatMap {
-                when (it) {
-                    LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
-                    LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
-                    LoginStatus.SUCCESS -> Ok(it)
-                }
-            }.flatMap {
-                if(it == LoginStatus.SUCCESS)
-                    Ok(Unit)
-                else Err(Unit)
+                loginKoan(it)
             }
+    }
+
+    private suspend fun login(apiRepo: SSOApiRepository, loginResult: Result<LoginStatus,Unit>, credential: Credential):Result<Unit,Unit> {
+        return loginResult.flatMap {
+            when (it) {
+                LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
+                LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
+                LoginStatus.SUCCESS -> Ok(it)
+            }
+        }.flatMap {
+            when (it) {
+                LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
+                LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
+                LoginStatus.SUCCESS -> Ok(it)
+            }
+        }.flatMap {
+            if(it == LoginStatus.SUCCESS)
+                idpRepository.roleSelect()
+                    .andThen { apiRepo.signinWithSso(it) }
+                    .mapError {  }
+            else Err(Unit)
+        }
+    }
+    suspend fun loginCle(credential: Credential): Result<Unit, Unit> {
+        return login(cleRepository, prepareForLoginCle(),credential)
+    }
+
+    suspend fun loginKoan(credential: Credential): Result<Unit, Unit> {
+        return login(koanRepository, prepareForLoginKoan(),credential)
     }
 
     suspend fun authPassword(userId: String, password: String): Result<LoginStatus, Unit> {
@@ -72,13 +99,6 @@ class LoginUseCase(
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_MFA
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
                 }
-            }
-            .andThen {
-                if (it == LoginStatus.SUCCESS)
-                    idpRepository.roleSelect()
-                        .andThen { cleRepository.signinWithSso(it) }
-                        .map { LoginStatus.SUCCESS }
-                else Ok(it)
             }.mapError {
                 Logger.error(this::class.simpleName, it)
             }
@@ -96,12 +116,6 @@ class LoginUseCase(
                     IdpRepository.IdpStatus.NEED_OTP -> LoginStatus.NEED_MFA
                     IdpRepository.IdpStatus.SUCCESS -> LoginStatus.SUCCESS
                 }
-            }.andThen {
-                if (it == LoginStatus.SUCCESS)
-                    idpRepository.roleSelect()
-                        .andThen { cleRepository.signinWithSso(it) }
-                        .map { LoginStatus.SUCCESS }
-                else Ok(it)
             }.mapError { }
     }
 
