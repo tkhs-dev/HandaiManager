@@ -27,7 +27,7 @@ fun RootScreen() {
             RootStateModel.Home ->
                 HomeScreen({router.push(RootStateModel.Preference)})
             RootStateModel.Login ->
-                LoginScreen()
+                LoginScreen({router.push(RootStateModel.Home)})
             RootStateModel.Preference ->
                 PreferenceScreen({router.push(RootStateModel.License)})
 

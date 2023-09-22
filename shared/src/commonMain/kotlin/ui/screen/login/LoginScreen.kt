@@ -51,7 +51,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onLoggedIn: ()-> Unit = {}) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: LoginScreenViewModel by inject() }
     }.viewModel
@@ -92,7 +92,7 @@ fun LoginScreen() {
                 }
 
             LoginScreenPage.LoginResultPage ->
-                LoginResult()
+                onLoggedIn()
         }
     }
 
