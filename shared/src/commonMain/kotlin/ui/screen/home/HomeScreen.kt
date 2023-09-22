@@ -22,6 +22,7 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,7 +34,6 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stac
 import com.arkivanov.decompose.router.stack.bringToFront
 import io.github.xxfast.decompose.router.Router
 import io.github.xxfast.decompose.router.content.RoutedContent
-import io.github.xxfast.decompose.router.rememberRouter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ui.screen.home.page.Activity
@@ -46,9 +46,7 @@ fun HomeScreen(router: Router<HomeScreenPage>,onNavigateToPreference: () -> Unit
     val viewModel = remember{ object : KoinComponent {
         val viewModel: HomeScreenViewModel by inject() }
     }.viewModel
-    val uiState = viewModel.uiState.collectAsState()
-
-    val router: Router<HomeScreenPage> = rememberRouter(HomeScreenPage::class,listOf(HomeScreenPage.Dashboard))
+    val uiState by viewModel.uiState.collectAsState()
 
     val mainPageContent = setOf(
         PageContent(Icons.Rounded.Home,"Dashboard",HomeScreenPage.Dashboard),
