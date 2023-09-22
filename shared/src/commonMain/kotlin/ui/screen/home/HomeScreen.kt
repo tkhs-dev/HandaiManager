@@ -42,7 +42,7 @@ import ui.screen.home.page.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateToPreference: () -> Unit = {  }) {
+fun HomeScreen(router: Router<HomeScreenPage>,onNavigateToPreference: () -> Unit = {  }) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: HomeScreenViewModel by inject() }
     }.viewModel
@@ -66,7 +66,7 @@ fun HomeScreen(onNavigateToPreference: () -> Unit = {  }) {
             PermanentDrawerSheet(drawerContainerColor = Color.White) {
                 Text("MAIN MENU", color = Color.Gray, fontSize = 13.sp, modifier = Modifier.padding(10.dp,10.dp))
                 for (page in mainPageContent){
-                    NavigationDrawerItem(icon={Icon(page.icon,page.text)}, label = { Text(page.text) }, selected = uiState.value.selectedPage == page.page, onClick = {
+                    NavigationDrawerItem(icon={Icon(page.icon,page.text)}, label = { Text(page.text) }, selected = uiState.selectedPage == page.page, onClick = {
                         viewModel.onNavigationDrawerClicked(page.page)
                         router.bringToFront(page.page)
                     },shape = RoundedCornerShape(10.dp), modifier = modifier, colors = colors)
@@ -74,7 +74,7 @@ fun HomeScreen(onNavigateToPreference: () -> Unit = {  }) {
                 Divider(modifier = Modifier.padding(10.dp,10.dp))
                 Text("PREFERENCE", color = Color.Gray, fontSize = 13.sp, modifier = Modifier.padding(10.dp,10.dp))
                 for (page in preferencePageContent){
-                    NavigationDrawerItem(icon={Icon(page.icon,page.text)}, label = { Text(page.text) }, selected = uiState.value.selectedPage == page.page, onClick = {
+                    NavigationDrawerItem(icon={Icon(page.icon,page.text)}, label = { Text(page.text) }, selected = uiState.selectedPage == page.page, onClick = {
                         viewModel.onNavigationDrawerClicked(page.page)
                         onNavigateToPreference()
                     },shape = RoundedCornerShape(10.dp), modifier = modifier, colors = colors)                }

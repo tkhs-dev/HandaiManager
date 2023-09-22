@@ -51,12 +51,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Composable
-fun LoginScreen(onLoggedIn: ()-> Unit = {}) {
+fun LoginScreen(router: Router<LoginScreenPage>,onLoggedIn: ()-> Unit = {}) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: LoginScreenViewModel by inject() }
     }.viewModel
-
-    val router: Router<LoginScreenPage> = rememberRouter(LoginScreenPage::class,listOf(LoginScreenPage.Information))
 
     viewModel.setListeners(
         onLoggedIn = {router.push(LoginScreenPage.LoginResultPage)},
