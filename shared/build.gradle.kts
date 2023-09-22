@@ -101,6 +101,7 @@ kotlin {
                 api("androidx.core:core-ktx:1.12.0")
                 implementation("commons-codec:commons-codec:1.16.0")
                 implementation("com.google.guava:guava:32.1.2-android")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
             }
         }
         val iosX64Main by getting
@@ -117,6 +118,7 @@ kotlin {
                 implementation(compose.desktop.common)
                 implementation("ch.qos.logback:logback-classic:1.4.11")
                 implementation("commons-codec:commons-codec:1.16.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
             }
         }
     }

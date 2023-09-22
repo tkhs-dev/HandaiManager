@@ -1,6 +1,7 @@
 package ui.screen.login
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.coroutineScope
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -8,10 +9,10 @@ import com.github.michaelbull.result.toResultOr
 import dev.icerock.moko.resources.StringResource
 import dev.tkhs.handaimanager.MR
 import domain.usecase.LoginUseCase
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import model.Credential
 
 class LoginScreenModel(private val loginUseCase: LoginUseCase): ScreenModel {
@@ -49,7 +50,7 @@ class LoginScreenModel(private val loginUseCase: LoginUseCase): ScreenModel {
     }
 
     suspend fun onStartLoginClicked() {
-        return coroutineScope {
+        coroutineScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             loginUseCase.prepareForLoginCle()
@@ -68,7 +69,7 @@ class LoginScreenModel(private val loginUseCase: LoginUseCase): ScreenModel {
     }
 
     suspend fun onAuthPasswordClicked() {
-        return coroutineScope {
+        coroutineScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             loginUseCase.authPassword(uiState.value.userId,uiState.value.password)
@@ -87,7 +88,7 @@ class LoginScreenModel(private val loginUseCase: LoginUseCase): ScreenModel {
     }
 
     suspend fun onAuthOtpClicked() {
-        return coroutineScope {
+        coroutineScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             val secret = Regex("secret=([^&]+)").find(uiState.value.otpCode)?.groupValues?.get(1)
