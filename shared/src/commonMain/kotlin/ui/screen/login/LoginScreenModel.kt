@@ -1,5 +1,6 @@
 package ui.screen.login
 
+import cafe.adriel.voyager.core.model.ScreenModel
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -7,13 +8,13 @@ import com.github.michaelbull.result.toResultOr
 import dev.icerock.moko.resources.StringResource
 import dev.tkhs.handaimanager.MR
 import domain.usecase.LoginUseCase
-import model.Credential
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import model.Credential
 
-class LoginScreenViewModel(private val loginUseCase: LoginUseCase) {
+class LoginScreenModel(private val loginUseCase: LoginUseCase): ScreenModel {
     data class UiState(
         val userId: String = "",
         val password: String = "",

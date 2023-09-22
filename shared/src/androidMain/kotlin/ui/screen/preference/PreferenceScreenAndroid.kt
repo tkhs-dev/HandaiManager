@@ -19,7 +19,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Composable
-actual fun PreferenceScreen(onNavigateToLicense: () -> Unit) {
+actual fun PlatformPreferenceScreen(onNavigateToLicense: () -> Unit) {
     val viewModel = remember{ object : KoinComponent {
         val viewModel: PreferenceScreenViewModel by inject() }
     }.viewModel

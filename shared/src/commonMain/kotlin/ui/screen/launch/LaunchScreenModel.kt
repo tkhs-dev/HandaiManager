@@ -1,12 +1,13 @@
 package ui.screen.launch
 
+import cafe.adriel.voyager.core.model.ScreenModel
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import domain.usecase.LoginUseCase
 import util.FileCookiesStorage
 import util.Logger
 
-class LaunchScreenViewModel(private val fileCookiesStorage: FileCookiesStorage, private val loginUseCase: LoginUseCase) {
+class LaunchScreenModel(private val fileCookiesStorage: FileCookiesStorage, private val loginUseCase: LoginUseCase) : ScreenModel {
     private var onNavigateToLogin: () -> Unit = {}
     private var onNavigateToHome: () -> Unit = {}
 

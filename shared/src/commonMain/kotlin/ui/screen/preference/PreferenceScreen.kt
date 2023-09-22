@@ -22,6 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
 import dev.icerock.moko.resources.compose.stringResource
 import dev.tkhs.handaimanager.MR
 import kotlinx.datetime.Instant
@@ -31,8 +32,15 @@ import kotlinx.datetime.toLocalDateTime
 private val STYLE_TITLE = TextStyle(fontSize = 20.sp)
 private val STYLE_DESCRIPTION = TextStyle(fontSize = 15.sp)
 
+class PreferenceScreen(private val onNavigateToLicense: () -> Unit) : Screen {
+    @Composable
+    override fun Content() {
+        PlatformPreferenceScreen(onNavigateToLicense = onNavigateToLicense)
+    }
+}
+
 @Composable
-expect fun PreferenceScreen(onNavigateToLicense: () -> Unit)
+expect fun PlatformPreferenceScreen(onNavigateToLicense: () -> Unit)
 
 @Composable
 fun ConfigSection(title:String, content : @Composable () -> Unit){

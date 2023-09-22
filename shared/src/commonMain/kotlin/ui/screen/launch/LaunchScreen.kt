@@ -6,25 +6,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ui.screen.home.HomeScreen
+import ui.screen.login.LoginScreen
 
-@Composable
-fun LaunchScreen(onNavigateToLogin: () -> Unit, onNavigateToHome: () -> Unit) {
-    val viewModel = remember{ object : KoinComponent {
-        val viewModel: LaunchScreenViewModel by inject() }
-    }.viewModel
+object LaunchScreen: Screen {
+    @Composable
+    override fun Content() {
+        val screenModel = getScreenModel<LaunchScreenModel>()
+        val navigator = LocalNavigator.currentOrThrow
+        screenModel.setListeners({navigator.popUntilRoot(); navigator.replace(LoginScreen{it.popUntilRoot(); it.replace(HomeScreen)})}, {navigator.popUntilRoot(); navigator.replace(HomeScreen)})
 
-    viewModel.setListeners(onNavigateToLogin, onNavigateToHome)
+        LaunchedEffect(Unit){
+            screenModel.onLaunched()
+        }
 
-    LaunchedEffect(Unit){
-        viewModel.onLaunched()
-    }
-
-    Row(modifier = Modifier.fillMaxSize(),horizontalArrangement = Arrangement.Center,verticalAlignment = Alignment.CenterVertically) {
-        CircularProgressIndicator()
+        Row(modifier = Modifier.fillMaxSize(),horizontalArrangement = Arrangement.Center,verticalAlignment = Alignment.CenterVertically) {
+            CircularProgressIndicator()
+        }
     }
 }
