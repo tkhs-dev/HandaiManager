@@ -15,6 +15,7 @@ plugins {
 
 val ktorVersion = "2.3.1"
 val ktorfitVersion = "1.4.3"
+val voyagerVersion = "1.0.0-rc07"
 
 configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
     version = ktorfitVersion
@@ -65,6 +66,11 @@ kotlin {
 
                 implementation("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-beta-01")
+
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
                 implementation("io.insert-koin:koin-core:3.4.3")
                 implementation("io.insert-koin:koin-test:3.4.3")
