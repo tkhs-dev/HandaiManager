@@ -119,6 +119,10 @@ kotlin {
                 implementation("ch.qos.logback:logback-classic:1.4.11")
                 implementation("commons-codec:commons-codec:1.16.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+
+                //for Desktop Preview
+                implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.80")
+                implementation(compose.desktop.currentOs)
             }
         }
     }
