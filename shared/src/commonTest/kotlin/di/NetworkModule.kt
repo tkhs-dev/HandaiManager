@@ -12,8 +12,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
-import network.CleService
-import network.KoanService
+import data.network.CleService
+import data.network.IdpService
+import data.network.KoanService
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

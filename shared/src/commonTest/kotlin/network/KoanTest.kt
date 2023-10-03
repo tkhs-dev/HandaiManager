@@ -1,6 +1,7 @@
 package network
 
 import com.github.michaelbull.result.get
+import data.network.AuthResponseData
 import di.NetworkModule
 import domain.repository.KoanRepository
 import kotlinx.coroutines.runBlocking

@@ -2,7 +2,7 @@ import com.github.michaelbull.result.get
 import di.NetworkModule
 import domain.repository.IdpRepository
 import kotlinx.coroutines.runBlocking
-import network.AuthRequestData
+import data.network.AuthRequestData
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest

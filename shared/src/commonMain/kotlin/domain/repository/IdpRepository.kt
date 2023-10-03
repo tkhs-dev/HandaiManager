@@ -18,10 +18,10 @@ import io.ktor.client.statement.request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import network.ApiError
-import network.AuthRequestData
-import network.AuthResponseData
-import network.IdpService
+import data.network.ApiError
+import data.network.AuthRequestData
+import data.network.AuthResponseData
+import data.network.IdpService
 import util.FileCookiesStorage
 import util.Logger
 

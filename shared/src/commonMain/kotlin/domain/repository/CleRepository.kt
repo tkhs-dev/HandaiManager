@@ -16,10 +16,10 @@ import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import network.ApiError
-import network.AuthRequestData
-import network.AuthResponseData
-import network.CleService
+import data.network.ApiError
+import data.network.AuthRequestData
+import data.network.AuthResponseData
+import data.network.CleService
 import util.FileCookiesStorage
 
 class CleRepository(
