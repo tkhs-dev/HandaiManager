@@ -1,4 +1,4 @@
-package data.network
+package network
 
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST

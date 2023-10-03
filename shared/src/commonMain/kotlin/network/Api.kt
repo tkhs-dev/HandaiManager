@@ -1,4 +1,4 @@
-package data.network
+package network
 
 sealed class ApiError {
     data class InvalidResponse(val responseCode: Int, val message: String?) : ApiError()

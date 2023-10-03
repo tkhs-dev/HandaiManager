@@ -1,9 +1,9 @@
 package di
 
 import data.cache.CacheManager
-import data.network.CleService
-import data.network.IdpService
-import data.network.KoanService
+import network.CleService
+import network.IdpService
+import network.KoanService
 import domain.repository.CleRepository
 import domain.repository.IdpRepository
 import domain.repository.KoanRepository

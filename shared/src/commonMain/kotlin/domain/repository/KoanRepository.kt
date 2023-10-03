@@ -8,10 +8,10 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.toErrorIfNull
 import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
-import data.network.ApiError
-import data.network.AuthRequestData
-import data.network.AuthResponseData
-import data.network.KoanService
+import network.ApiError
+import network.AuthRequestData
+import network.AuthResponseData
+import network.KoanService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage

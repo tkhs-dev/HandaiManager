@@ -1,9 +1,9 @@
 package domain.repository
 
 import com.github.michaelbull.result.Result
-import data.network.ApiError
-import data.network.AuthRequestData
-import data.network.AuthResponseData
+import network.ApiError
+import network.AuthRequestData
+import network.AuthResponseData
 
 /**
  * 大阪大学の認証サービスを利用するAPIを扱うリポジトリ

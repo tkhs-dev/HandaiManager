@@ -12,7 +12,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import data.network.ApiError
+import network.ApiError
 import util.Logger
 
 abstract class ApiRepository(private val cacheManager: CacheManager) {
