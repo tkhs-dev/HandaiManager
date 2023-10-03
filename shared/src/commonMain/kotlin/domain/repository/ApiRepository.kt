@@ -11,7 +11,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import network.ApiError
+import data.network.ApiError
 import util.Logger
 
 abstract class ApiRepository {
