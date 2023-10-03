@@ -1,5 +1,9 @@
 package di
 
+import data.cache.CacheManager
+import data.network.CleService
+import data.network.IdpService
+import data.network.KoanService
 import domain.repository.CleRepository
 import domain.repository.IdpRepository
 import domain.repository.KoanRepository
@@ -12,9 +16,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
-import data.network.CleService
-import data.network.IdpService
-import data.network.KoanService
+import kotlinx.datetime.Clock
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -22,7 +24,9 @@ class NetworkModule {
     companion object{
         fun getCleModule(successGetSamlRequest:Boolean,successAuthSamlSso:Boolean): Module {
             return module{
-                single { CleRepository(cleApi = object: CleService {
+                single { CleRepository(
+                    cacheManager = InMemoryCacheManager(),
+                    cleApi = object: CleService {
                     override suspend fun getSamlRequest(): HttpResponse {
                         return HttpClient(MockEngine{ request ->
                             respond(
@@ -52,7 +56,9 @@ class NetworkModule {
 
         fun getKoanModule(successGetSamlRequest:Boolean,successAuthSamlSso:Boolean): Module {
             return module{
-                single { KoanRepository(koanApi = object: KoanService {
+                single { KoanRepository(
+                    cacheManager = InMemoryCacheManager(),
+                    koanApi = object: KoanService {
                     override suspend fun getSamlRequest(): HttpResponse {
                         return HttpClient(MockEngine{ request ->
                             respond(
@@ -97,7 +103,9 @@ class NetworkModule {
 
         fun getIdpModule(successConnectSsoSite:Boolean,needAuthPassword:Boolean,needAuthMfa:Boolean,successAuthPassword:Boolean,successAuthMfa:Boolean,successRoleSelect:Boolean): Module {
             return module{
-                single { IdpRepository(idpApi = object: network.IdpService {
+                single { IdpRepository(
+                    cacheManager = InMemoryCacheManager(),
+                    idpApi = object: IdpService {
                     override suspend fun connectSsoSite(
                         samlRequest: String,
                         relayState: String?,
@@ -136,5 +144,29 @@ class NetworkModule {
                 }) }
             }
         }
+    }
+}
+
+class InMemoryCacheManager:CacheManager{
+    private val cache = mutableMapOf<String, CachedData>()
+    override fun <T> get(key: String, ignoreExpired:Boolean): T? {
+        val cachedData = cache[key] ?: return null
+        if (cachedData.isExpired && !ignoreExpired) {
+            return null
+        }
+        return cachedData.value as T
+    }
+
+    override fun set(key: String, value: Any, expire: Long) {
+        cache[key] = CachedData(value, expire)
+    }
+
+    override fun clear() {
+        throw UnsupportedOperationException()
+    }
+
+    private class CachedData(val value: Any, val expire: Long) {
+        val isExpired: Boolean
+            get() = expire > 0 && Clock.System.now().toEpochMilliseconds() > expire
     }
 }

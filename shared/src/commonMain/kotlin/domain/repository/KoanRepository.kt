@@ -21,20 +21,16 @@ import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
-import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import model.TimeTable
-import network.ApiError
-import network.AuthRequestData
-import network.AuthResponseData
-import network.KoanService
 import util.FileCookiesStorage
 import util.HtmlUtil
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 class KoanRepository(
+    private val cacheManager: CacheManager,
     private val fileCookiesStorage: FileCookiesStorage? = null,
     private val koanApi: KoanService =
         Ktorfit.Builder().httpClient(HttpClient {
@@ -54,10 +50,10 @@ class KoanRepository(
         }).baseUrl(KoanService.BASE_URL)
             .build()
             .create()
-): ApiRepository(), SSOApiRepository {
+): ApiRepository(cacheManager), SSOApiRepository {
     override suspend fun getAuthRequest(): Result<AuthRequestData, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi(ignoreAuthError = true) {
+            validateHttpResponse(ignoreAuthError = true) {
                 koanApi.getSamlRequest()
             }.flatMap {
                 it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
@@ -81,7 +77,7 @@ class KoanRepository(
 
     override suspend fun signinWithSso(authResponseData: AuthResponseData): Result<Unit, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi {
+            validateHttpResponse {
                 koanApi.authSamlSso(
                     authResponseData.samlResponse,
                     authResponseData.relayState ?: "null"
@@ -96,38 +92,48 @@ class KoanRepository(
         }
     }
 
-    @OptIn(InternalAPI::class, ExperimentalEncodingApi::class)
-    suspend fun getTimeTable(term:TimeTable.Term, year:Int):Result<TimeTable,ApiError>{
-        koanApiRedirectable.getRishuPage()
-        return withContext(Dispatchers.IO){
-            tryCallApi {
-                koanApiRedirectable.getTimeTable()
-            }.flatMap {
-                val body = it.bodyAsText()
-                val nterm = Regex("""(\d{4})年度　(春学期|夏学期|秋学期|冬学期)""").find(body)
-                    ?.groupValues?.get(2)?.let { TimeTable.Term.fromJpText(it) }
-                    ?: return@flatMap Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
-                if(nterm == term){
-                   Ok(it)
-                }else{
-                    val fekey = it.request.url.parameters["_flowExecutionKey"] ?: return@flatMap Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
-                    val gakkiKbnCode = when(term){
-                        TimeTable.Term.SPRING -> 3
-                        TimeTable.Term.SUMMER -> 4
-                        TimeTable.Term.AUTUMN -> 5
-                        TimeTable.Term.WINTER -> 6
+    suspend fun getTimeTable(term:TimeTable.Term, year:Int):Result<TimeTable, ApiError>{
+        return useCache("timetable_${term.name}_$year") {
+            setExpire(Clock.System.now().toEpochMilliseconds()+1000*60)
+            koanApiRedirectable.getRishuPage()
+            withContext(Dispatchers.IO) {
+                validateHttpResponse {
+                    koanApiRedirectable.getTimeTable()
+                }.flatMap {
+                    val body = it.bodyAsText()
+                    val nterm = Regex("""(\d{4})年度　(春学期|夏学期|秋学期|冬学期)""").find(body)
+                        ?.groupValues?.get(2)?.let { TimeTable.Term.fromJpText(it) }
+                        ?: return@flatMap Err(
+                            ApiError.InvalidResponse(
+                                it.status.value,
+                                it.bodyAsText()
+                            )
+                        )
+                    if (nterm == term) {
+                        Ok(it)
+                    } else {
+                        val fekey =
+                            it.request.url.parameters["_flowExecutionKey"] ?: return@flatMap Err(
+                                ApiError.InvalidResponse(it.status.value, it.bodyAsText())
+                            )
+                        val gakkiKbnCode = when (term) {
+                            TimeTable.Term.SPRING -> 3
+                            TimeTable.Term.SUMMER -> 4
+                            TimeTable.Term.AUTUMN -> 5
+                            TimeTable.Term.WINTER -> 6
+                        }
+                        validateHttpResponse {
+                            koanApiRedirectable.getTimeTableByTerm(fekey, gakkiKbnCode)
+                        }
                     }
-                    tryCallApi{
-                        koanApiRedirectable.getTimeTableByTerm(fekey, gakkiKbnCode)
+                }.flatMap {
+                    com.github.michaelbull.result.runCatching {
+                        HtmlUtil.parseTimeTable(it.bodyAsText())
+                    }.mapError {
+                        ApiError.ParseError(it.message)
+                    }.toErrorIfNull {
+                        ApiError.ParseError(null)
                     }
-                }
-            }.flatMap {
-                com.github.michaelbull.result.runCatching {
-                    HtmlUtil.parseTimeTable(it.bodyAsText())
-                }.mapError {
-                    ApiError.ParseError(it.message)
-                }.toErrorIfNull {
-                    ApiError.ParseError(null)
                 }
             }
         }

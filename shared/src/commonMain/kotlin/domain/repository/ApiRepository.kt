@@ -7,6 +7,7 @@ import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
+import data.cache.CacheManager
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -14,8 +15,8 @@ import io.ktor.http.isSuccess
 import data.network.ApiError
 import util.Logger
 
-abstract class ApiRepository {
-    protected suspend inline fun tryCallApi(
+abstract class ApiRepository(private val cacheManager: CacheManager) {
+    protected suspend inline fun validateHttpResponse(
         ignoreAuthError:Boolean = false,
         onCatchException: (Throwable) -> Unit = {},
         onResponseFailure: (HttpResponse) -> Unit = {},
@@ -43,6 +44,25 @@ abstract class ApiRepository {
                     Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
                 }
             }
+        }
+    }
+
+    suspend fun <T : Any> useCache(
+        key:String,
+        ignoreExpired:Boolean = false,
+        block: suspend CacheConfig.() -> T
+    ):T{
+        val cacheConfig = CacheConfig()
+        return cacheManager.get<T>(key,ignoreExpired) ?: block(cacheConfig).also {
+            cacheManager.set(key,it,cacheConfig.expire)
+        }
+    }
+
+    class CacheConfig(){
+        internal var expire:Long = 0
+
+        fun setExpire(expire:Long){
+            this.expire = expire
         }
     }
 }

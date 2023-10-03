@@ -1,5 +1,7 @@
 package di
 
+import data.cache.CacheManager
+import data.cache.CacheManagerImpl
 import domain.repository.CleRepository
 import domain.repository.ConfigRepository
 import domain.repository.CredentialRepository
@@ -16,10 +18,11 @@ import ui.screen.login.LoginScreenModel
 import util.FileCookiesStorage
 
 val commonModule = module{
+    single { CacheManagerImpl() as CacheManager }
     single { FileCookiesStorage() }
-    single{IdpRepository(fileCookiesStorage = get())}
-    single{CleRepository(fileCookiesStorage = get())}
-    single{ KoanRepository(fileCookiesStorage = get())}
+    single{IdpRepository(cacheManager = get(), fileCookiesStorage = get())}
+    single{CleRepository(cacheManager = get(), fileCookiesStorage = get())}
+    single{ KoanRepository(cacheManager = get(), fileCookiesStorage = get())}
     single { CredentialRepository() }
     single { ConfigRepository() }
     single { LicensesRepository() }

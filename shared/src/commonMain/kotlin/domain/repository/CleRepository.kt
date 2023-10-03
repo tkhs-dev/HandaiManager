@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.toResultOr
+import data.cache.CacheManager
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -23,6 +24,7 @@ import data.network.CleService
 import util.FileCookiesStorage
 
 class CleRepository(
+    private val cacheManager: CacheManager,
     private val fileCookiesStorage: FileCookiesStorage? = null,
     private val cleApi: CleService =
         Ktorfit.Builder().httpClient(HttpClient {
@@ -33,10 +35,10 @@ class CleRepository(
         }).baseUrl(CleService.BASE_URL)
             .build()
             .create()
-) : ApiRepository(), SSOApiRepository {
+) : ApiRepository(cacheManager), SSOApiRepository {
     override suspend fun getAuthRequest(): Result<AuthRequestData, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi(ignoreAuthError = true) {
+            validateHttpResponse(ignoreAuthError = true) {
                 cleApi.getSamlRequest()
             }.flatMap {
                 it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
@@ -60,7 +62,7 @@ class CleRepository(
 
     override suspend fun signinWithSso(authResponseData: AuthResponseData): Result<Unit, ApiError> {
         return withContext(Dispatchers.IO) {
-            tryCallApi {
+            validateHttpResponse {
                 cleApi.authSamlSso(
                     authResponseData.samlResponse,
                     authResponseData.relayState ?: "null"

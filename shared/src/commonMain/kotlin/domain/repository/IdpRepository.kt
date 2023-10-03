@@ -9,6 +9,7 @@ import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
+import data.cache.CacheManager
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -26,6 +27,7 @@ import util.FileCookiesStorage
 import util.Logger
 
 class IdpRepository(
+    private val cacheManager: CacheManager,
     private val fileCookiesStorage: FileCookiesStorage? = null,
     private val idpApi: IdpService =
         Ktorfit.Builder().httpClient(HttpClient {
@@ -36,7 +38,7 @@ class IdpRepository(
         }).baseUrl(IdpService.BASE_URL)
             .build()
             .create()
-):ApiRepository() {
+):ApiRepository(cacheManager) {
     suspend fun authenticate(authRequestData: AuthRequestData, userid: String, password: String, code: String): Result<AuthResponseData, ApiError> {
         return prepareForLogin(authRequestData)
             .andThen {
@@ -58,7 +60,7 @@ class IdpRepository(
 
     suspend fun prepareForLogin(authRequestData: AuthRequestData):Result<IdpStatus, ApiError>{
         return withContext(Dispatchers.IO){
-            tryCallApi(ignoreAuthError = true) {
+            validateHttpResponse(ignoreAuthError = true) {
                 idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
             }
                 .flatMap{
@@ -77,7 +79,7 @@ class IdpRepository(
         }
     }
 
-    suspend fun authPassword(userId:String,password:String):Result<IdpStatus,ApiError>{
+    suspend fun authPassword(userId:String,password:String):Result<IdpStatus, ApiError>{
         return withContext(Dispatchers.IO){
             runCatching {
                 idpApi.authPassword(userId,password)
@@ -100,7 +102,7 @@ class IdpRepository(
         }
     }
 
-    suspend fun authOtp(code:String):Result<IdpStatus,ApiError>{
+    suspend fun authOtp(code:String):Result<IdpStatus, ApiError>{
         return withContext(Dispatchers.IO){
             runCatching{
                 idpApi.authMfa(code)
@@ -120,7 +122,7 @@ class IdpRepository(
         }
     }
 
-    suspend fun roleSelect():Result<AuthResponseData,ApiError>{
+    suspend fun roleSelect():Result<AuthResponseData, ApiError>{
         return withContext(Dispatchers.IO){
             runCatching {
                 idpApi.roleSelect()
