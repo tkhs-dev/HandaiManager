@@ -2,6 +2,7 @@ package data.cache
 
 import data.realm.RealmManager
 import data.realm.model.Cache
+import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.copyFromRealm
 import io.realm.kotlin.ext.query
 import kotlinx.serialization.KSerializer
@@ -27,7 +28,7 @@ class CacheManagerImpl(private val realmManager: RealmManager): CacheManager{
                 this.key = key
                 this.value = format.encodeToString(serializer, value)
                 this.expire = expire
-            })
+            }, updatePolicy = UpdatePolicy.ALL)
         }
     }
 
