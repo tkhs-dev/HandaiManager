@@ -1,8 +1,11 @@
 package model
 
 import kotlinx.datetime.DayOfWeek
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TimeTable(val year:Int, val term:Term, val classes:List<DayTimeTable>){
+    @Serializable
     sealed class TimeTableClass{
         data class Class(val id:String, val name:String?, val teacher:String?, val room:List<String>?):TimeTableClass()
         object Empty:TimeTableClass()
@@ -27,5 +30,6 @@ data class TimeTable(val year:Int, val term:Term, val classes:List<DayTimeTable>
         }
     }
 
+    @Serializable
     data class DayTimeTable(val day:DayOfWeek, val classes:List<TimeTableClass>)
 }
