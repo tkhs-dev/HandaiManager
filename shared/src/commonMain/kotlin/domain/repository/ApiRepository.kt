@@ -15,10 +15,12 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import kotlinx.datetime.Clock
 import kotlinx.serialization.KSerializer
 import network.ApiError
 import util.Logger
 import kotlin.jvm.JvmName
+import kotlin.time.Duration
 
 abstract class ApiRepository(private val cacheManager: CacheManager) {
     protected suspend inline fun validateHttpResponse(
@@ -89,8 +91,8 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
     class CacheConfig(){
         internal var expire:Long = 0
 
-        fun setExpire(expire:Long){
-            this.expire = expire
+        fun setExpire(epochMillis:Long){
+            this.expire = epochMillis
         }
     }
 }
