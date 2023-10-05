@@ -1,29 +1,39 @@
 package data.cache
 
-import kotlinx.datetime.Clock
+import data.realm.RealmManager
+import data.realm.model.Cache
+import io.realm.kotlin.ext.copyFromRealm
+import io.realm.kotlin.ext.query
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import util.Logger
 
-class CacheManagerImpl: CacheManager{
-    private val cache = mutableMapOf<String, CachedData>()
-    override fun <T> get(key: String, ignoreExpired:Boolean): T? {
-        val cachedData = cache[key] ?: return null
+class CacheManagerImpl(private val realmManager: RealmManager): CacheManager{
+    private val format = Json{ignoreUnknownKeys = true}
+    override fun <T> get(key: String, serializer: KSerializer<T>, ignoreExpired:Boolean): T? {
+        val cachedData = realmManager.cacheRealm.query<Cache>("key == $0",key).first()
+            .find()
+            ?.copyFromRealm() ?: return null
         if (cachedData.isExpired && !ignoreExpired) {
             return null
         }
         Logger.debug(this::class.simpleName, "load from cache: $key")
-        return cachedData.value as T
+        return format.decodeFromString(serializer, cachedData.value)
     }
 
-    override fun set(key: String, value: Any, expire: Long) {
-        cache[key] = CachedData(value, expire)
+    override fun <T> set(key: String, serializer: KSerializer<T>, value: T, expire: Long) {
+        realmManager.cacheRealm.writeBlocking {
+            this.copyToRealm(Cache().apply {
+                this.key = key
+                this.value = format.encodeToString(serializer, value)
+                this.expire = expire
+            })
+        }
     }
 
     override fun clear() {
-        cache.clear()
+        realmManager.cacheRealm.writeBlocking {
+            delete(query<Cache>().find())
+        }
     }
-}
-
-private class CachedData(val value: Any, val expire: Long) {
-    val isExpired: Boolean
-        get() = expire > 0 && Clock.System.now().toEpochMilliseconds() > expire
 }

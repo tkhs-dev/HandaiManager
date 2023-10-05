@@ -2,6 +2,7 @@ package di
 
 import data.cache.CacheManager
 import data.cache.CacheManagerImpl
+import data.realm.RealmManager
 import domain.repository.CleRepository
 import domain.repository.ConfigRepository
 import domain.repository.CredentialRepository
@@ -18,7 +19,8 @@ import ui.screen.login.LoginScreenModel
 import util.FileCookiesStorage
 
 val commonModule = module{
-    single { CacheManagerImpl() as CacheManager }
+    single { RealmManager() }
+    single { CacheManagerImpl(get()) as CacheManager }
     single { FileCookiesStorage() }
     single{IdpRepository(cacheManager = get(), fileCookiesStorage = get())}
     single{CleRepository(cacheManager = get(), fileCookiesStorage = get())}
@@ -28,7 +30,7 @@ val commonModule = module{
     single { LicensesRepository() }
     single {LoginUseCase(get(),get(),get(),get())}
     single { PreferenceUsecase(get()) }
-    factory { LaunchScreenModel(get(), get()) }
+    factory { LaunchScreenModel(get(), get(), get()) }
     factory { LoginScreenModel(get())}
     factory { HomeScreenModel()}
     factory { LicenseScreenModel(get()) }
