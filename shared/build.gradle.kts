@@ -11,6 +11,7 @@ plugins {
     id("com.palantir.git-version") version "3.0.0"
     id("com.github.gmazzo.buildconfig") version "4.1.2"
     id("com.mikepenz.aboutlibraries.plugin") version "10.8.3"
+    id("io.realm.kotlin") version "1.11.1"
 }
 
 val ktorVersion = "2.3.1"
@@ -87,6 +88,8 @@ kotlin {
 
                 implementation("dev.icerock.moko:resources:0.23.0")
                 implementation("dev.icerock.moko:resources-compose:0.23.0")
+
+                implementation("io.realm.kotlin:library-base:1.11.1")
 
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
