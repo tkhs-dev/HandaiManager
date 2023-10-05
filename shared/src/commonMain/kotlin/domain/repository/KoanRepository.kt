@@ -93,7 +93,7 @@ class KoanRepository(
     }
 
     suspend fun getTimeTable(term:TimeTable.Term, year:Int):Result<TimeTable, ApiError>{
-        return useCache("timetable_${term.name}_$year") {
+        return useCache<TimeTable, ApiError>("timetable_${term.name}_$year", TimeTable.serializer()){
             setExpire(Clock.System.now().toEpochMilliseconds()+1000*60)
             koanApiRedirectable.getRishuPage()
             withContext(Dispatchers.IO) {
