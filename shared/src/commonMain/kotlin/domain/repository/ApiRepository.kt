@@ -94,5 +94,9 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
         fun setExpire(epochMillis:Long){
             this.expire = epochMillis
         }
+
+        fun setAge(duration: Duration){
+            this.expire = duration.inWholeMilliseconds + Clock.System.now().toEpochMilliseconds()
+        }
     }
 }
