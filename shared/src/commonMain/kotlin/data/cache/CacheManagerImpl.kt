@@ -32,6 +32,12 @@ class CacheManagerImpl(private val realmManager: RealmManager): CacheManager{
         }
     }
 
+    override fun getAllKeys(): List<String> {
+        realmManager.cacheRealm.query<Cache>().find().let {
+            return it.map { it.key }
+        }
+    }
+
     override fun clear() {
         realmManager.cacheRealm.writeBlocking {
             delete(query<Cache>().find())
