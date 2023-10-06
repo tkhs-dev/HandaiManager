@@ -35,6 +35,9 @@ actual fun PlatformPreferenceScreen(onNavigateToLicense: () -> Unit) {
             Divider()
             ConfigSection(title = stringResource(MR.strings.screen_preference_debug)){
                 versionInfo()
+                ButtonElement(title = stringResource(MR.strings.screen_preference_cache_clear_title), description = stringResource(MR.strings.screen_preference_cache_clear_description), onClick = { viewModel.clearCache() }){
+                    Text(stringResource(MR.strings.screen_preference_cache_clear))
+                }
             }
             ConfigSection(title = stringResource(MR.strings.screen_preference_information)){
                 TextButton(onClick = onNavigateToLicense) {

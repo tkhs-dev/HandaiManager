@@ -7,4 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class PreferenceScreenDesktopViewModel(private val preferenceUsecase: PreferenceUsecase) {
     private val _uiState = MutableStateFlow(preferenceUsecase.getConfig())
     val uiState = _uiState.asStateFlow()
+
+    fun clearCache(){
+        preferenceUsecase.clearCache()
+    }
 }

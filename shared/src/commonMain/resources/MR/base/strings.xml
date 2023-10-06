@@ -35,4 +35,7 @@
     <string name="screen_preference_build">ビルド情報</string>
     <string name="screen_preference_build_version">バージョン</string>
     <string name="screen_preference_build_date">ビルド日時</string>
+    <string name="screen_preference_cache_clear_title">キャッシュのクリア</string>
+    <string name="screen_preference_cache_clear_description">アプリが保存しているキャッシュをすべて削除します。これにより、アプリの動作に関する問題が解消することがあります。</string>
+    <string name="screen_preference_cache_clear">クリア</string>
 </resources>

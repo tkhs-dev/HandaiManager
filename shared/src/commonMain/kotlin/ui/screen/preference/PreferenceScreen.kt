@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -49,6 +50,22 @@ fun ConfigSection(title:String, content : @Composable () -> Unit){
         Column(modifier = Modifier.padding(10.dp,0.dp)) {
             content()
         }
+    }
+}
+
+@Composable
+fun ButtonElement(title: String, description:String, onClick: () -> Unit, buttonText: @Composable () -> Unit ){
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row{
+            Box(modifier = Modifier.align(Alignment.CenterVertically)){
+                Text(title, style = STYLE_TITLE, modifier = Modifier.wrapContentHeight())
+            }
+            Box(modifier = Modifier.weight(1f))
+            Button(onClick = onClick, modifier = Modifier.scale(0.8f)) {
+                buttonText()
+            }
+        }
+        Text(description, style = STYLE_DESCRIPTION)
     }
 }
 
