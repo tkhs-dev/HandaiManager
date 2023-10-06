@@ -11,10 +11,12 @@ import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone
@@ -26,19 +28,32 @@ import kotlin.jvm.JvmName
 import kotlin.time.Duration
 
 abstract class ApiRepository(private val cacheManager: CacheManager) {
-    protected suspend inline fun validateHttpResponse(
-        ignoreAuthError:Boolean = false,
+
+    protected inline fun <T : Any> safeApiCall(
         onCatchException: (Throwable) -> Unit = {},
-        onResponseFailure: (HttpResponse) -> Unit = {},
-        block: () -> HttpResponse
-    ): Result<HttpResponse, ApiError> {
+        block: () -> T
+    ): Result<T, ApiError> {
         return runCatching {
             block()
         }.onFailure {
             Logger.error(this::class.simpleName, it)
             onCatchException(it)
         }.mapError {
-            ApiError.InternalException(it)
+            if(it is ConnectTimeoutException || it is UnresolvedAddressException){
+                ApiError.NetworkError
+            }else{
+                ApiError.InternalException(it)
+            }
+        }
+    }
+    protected suspend inline fun validateHttpResponse(
+        ignoreAuthError:Boolean = false,
+        onCatchException: (Throwable) -> Unit = {},
+        onResponseFailure: (HttpResponse) -> Unit = {},
+        block: () -> HttpResponse
+    ): Result<HttpResponse, ApiError> {
+        return safeApiCall(onCatchException) {
+            block()
         }.flatMap {
             if (it.status.isSuccess() || it.status== HttpStatusCode.Found) {
                 if(it.headers["Location"]?.contains("sso_redirect") == true && !ignoreAuthError ){

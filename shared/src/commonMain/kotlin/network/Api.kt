@@ -5,6 +5,7 @@ sealed class ApiError {
     data class InternalException(val throwable: Throwable) : ApiError()
     data class ParseError(val message: String?) : ApiError()
     object AuthError : ApiError()
+    object NetworkError : ApiError()
     object WrongCredentials : ApiError()
     object Unknown : ApiError()
 }
