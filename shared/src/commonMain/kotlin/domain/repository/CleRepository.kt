@@ -4,8 +4,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.flatMap
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -82,13 +80,13 @@ class CleRepository(
     }
 
     suspend fun getUserInfo(): Result<User,ApiError> {
-        return runCatching {
+        return safeApiCall {
             useCache<User>("cle_user_info", User.serializer(), ignoreExpired = true) {
                 setAge(DateTimePeriod(months = 6))
                 withContext(Dispatchers.IO) {
                     cleApi.getUserInfo()
                 }
             }
-        }.mapError { ApiError.InternalException(it) }
+        }
     }
 }
