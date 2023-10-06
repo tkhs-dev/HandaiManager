@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import io.ktor.client.statement.HttpResponse
+import model.User
 
 interface CleService{
     companion object {
@@ -16,4 +17,7 @@ interface CleService{
     @POST("auth-saml/saml/SSO")
     @FormUrlEncoded
     suspend fun authSamlSso(@Field("SAMLResponse") samlResponse:String,@Field("RelayState") relayState:String?,@Field("button") button:String = "Send"): HttpResponse
+
+    @GET("learn/api/public/v1/users/me")
+    suspend fun getUserInfo():User
 }
