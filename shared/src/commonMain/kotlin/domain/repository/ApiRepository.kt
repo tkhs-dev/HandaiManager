@@ -16,6 +16,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.serialization.KSerializer
 import network.ApiError
 import util.Logger
@@ -96,7 +99,11 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
         }
 
         fun setAge(duration: Duration){
-            this.expire = duration.inWholeMilliseconds + Clock.System.now().toEpochMilliseconds()
+            this.expire = Clock.System.now().plus(duration).toEpochMilliseconds()
+        }
+
+        fun setAge(period: DateTimePeriod){
+            this.expire = Clock.System.now().plus(period,TimeZone.currentSystemDefault()).toEpochMilliseconds()
         }
     }
 }
