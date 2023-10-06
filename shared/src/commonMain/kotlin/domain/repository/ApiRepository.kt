@@ -36,12 +36,12 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
         return runCatching {
             block()
         }.onFailure {
-            Logger.error(this::class.simpleName, it)
             onCatchException(it)
         }.mapError {
             if(it is ConnectTimeoutException || it is UnresolvedAddressException){
                 ApiError.NetworkError
             }else{
+                Logger.error(this::class.simpleName, it)
                 ApiError.InternalException(it)
             }
         }
