@@ -72,7 +72,7 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
         }
     }
 
-    suspend fun <T : Any> useCache(
+    protected suspend fun <T : Any> useCache(
         key:String,
         serializer: KSerializer<T>,
         ignoreExpired:Boolean = false,
@@ -85,7 +85,7 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
     }
 
     @JvmName("useCacheWithResult")
-    suspend fun <T,U> useCache(
+    protected suspend fun <T,U> useCache(
         key:String,
         serializer: KSerializer<T>,
         ignoreExpired:Boolean = false,
@@ -106,7 +106,7 @@ abstract class ApiRepository(private val cacheManager: CacheManager) {
             )
     }
 
-    class CacheConfig(){
+    protected class CacheConfig(){
         internal var expire:Long = 0
 
         fun setExpire(epochMillis:Long){
