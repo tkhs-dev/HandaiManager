@@ -1,9 +1,6 @@
 package di
 
 import data.cache.CacheManager
-import network.CleService
-import network.IdpService
-import network.KoanService
 import domain.repository.CleRepository
 import domain.repository.IdpRepository
 import domain.repository.KoanRepository
@@ -17,6 +14,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.datetime.Clock
+import kotlinx.serialization.KSerializer
+import model.User
+import network.CleService
+import network.IdpService
+import network.KoanService
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -50,7 +52,12 @@ class NetworkModule {
                             )
                         }){followRedirects = false}.request()
                     }
-                }) }
+
+                        override suspend fun getUserInfo(): User {
+                            return User(User.Avatar("",""), User.Contact(""),"","", listOf(),
+                                User.Job("",""),"", User.Name("","", ""),"",listOf(),"","")
+                        }
+                    }) }
             }
         }
 
@@ -149,7 +156,7 @@ class NetworkModule {
 
 class InMemoryCacheManager:CacheManager{
     private val cache = mutableMapOf<String, CachedData>()
-    override fun <T> get(key: String, ignoreExpired:Boolean): T? {
+    override fun <T> get(key: String, serializer: KSerializer<T>, ignoreExpired: Boolean): T? {
         val cachedData = cache[key] ?: return null
         if (cachedData.isExpired && !ignoreExpired) {
             return null
@@ -157,7 +164,7 @@ class InMemoryCacheManager:CacheManager{
         return cachedData.value as T
     }
 
-    override fun set(key: String, value: Any, expire: Long) {
+    override fun <T> set(key: String, serializer: KSerializer<T>, value: T, expire: Long) {
         cache[key] = CachedData(value, expire)
     }
 
@@ -165,7 +172,7 @@ class InMemoryCacheManager:CacheManager{
         throw UnsupportedOperationException()
     }
 
-    private class CachedData(val value: Any, val expire: Long) {
+    private class CachedData(val value: Any?, val expire: Long) {
         val isExpired: Boolean
             get() = expire > 0 && Clock.System.now().toEpochMilliseconds() > expire
     }
