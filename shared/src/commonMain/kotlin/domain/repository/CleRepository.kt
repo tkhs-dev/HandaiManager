@@ -34,6 +34,10 @@ class CleRepository(
             install(HttpCookies){
                 storage = fileCookiesStorage ?: AcceptAllCookiesStorage()
             }
+        }.also {
+            it.sendPipeline.intercept(HttpSendPipeline.State) {
+                context.headers[HttpHeaders.Cookie] = context.headers[HttpHeaders.Cookie]?.replace("\"","") ?: ""
+            }
         }).baseUrl(CleService.BASE_URL)
             .build()
             .create()

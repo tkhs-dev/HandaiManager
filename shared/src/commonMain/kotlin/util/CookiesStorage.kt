@@ -52,7 +52,7 @@ class FileCookiesStorage: CookiesStorage {
         val now = getTimeMillis()
         if (now >= oldestCookie.value) cleanup(now)
 
-        return@withLock container.filter { it.matches(requestUrl) }
+        return@withLock container.filter { it.matches(requestUrl) }.map { it.copy(encoding = CookieEncoding.DQUOTES) }
     }
 
     override suspend fun addCookie(requestUrl: Url, cookie: Cookie): Unit = mutex.withLock {
@@ -100,13 +100,13 @@ class FileCookiesStorage: CookiesStorage {
 data class CookieSerializable(val name:String, val value:String, val encoding: CookieEncoding, val maxAge:Int, val expires:Instant?, val domain:String?, val path:String?, val secure:Boolean, val httpOnly:Boolean, val extensions:Map<String,String?>){
     companion object{
         fun fromCookie(cookie: Cookie):CookieSerializable{
-            return CookieSerializable(cookie.name,cookie.value,cookie.encoding,cookie.maxAge,
+            return CookieSerializable(cookie.name,cookie.value,CookieEncoding.DQUOTES,cookie.maxAge,
                 cookie.expires?.let { Instant.fromEpochMilliseconds(it.timestamp) },cookie.domain,cookie.path,cookie.secure,cookie.httpOnly,cookie.extensions)
         }
     }
 
     fun toCookie(): Cookie{
-        return Cookie(name,value,CookieEncoding.URI_ENCODING,maxAge, expires?.epochSeconds?.let{GMTDate(it)},domain,path,secure,httpOnly,extensions)
+        return Cookie(name,value,CookieEncoding.DQUOTES,maxAge, expires?.epochSeconds?.let{GMTDate(it)},domain,path,secure,httpOnly,extensions)
     }
 }
 
