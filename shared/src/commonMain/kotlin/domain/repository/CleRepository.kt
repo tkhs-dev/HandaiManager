@@ -10,6 +10,7 @@ import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.request.HttpSendPipeline
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
