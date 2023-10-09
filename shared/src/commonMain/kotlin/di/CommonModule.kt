@@ -13,6 +13,7 @@ import domain.usecase.LoginUseCase
 import domain.usecase.PreferenceUsecase
 import org.koin.dsl.module
 import ui.screen.home.HomeScreenModel
+import ui.screen.home.page.DashboardScreenModel
 import ui.screen.launch.LaunchScreenModel
 import ui.screen.license.LicenseScreenModel
 import ui.screen.login.LoginScreenModel
@@ -29,9 +30,10 @@ val commonModule = module{
     single { ConfigRepository() }
     single { LicensesRepository() }
     single {LoginUseCase(get(),get(),get(),get())}
-    single { PreferenceUsecase(get()) }
+    single { PreferenceUsecase(get(), get()) }
     factory { LaunchScreenModel(get(), get(), get()) }
     factory { LoginScreenModel(get())}
     factory { HomeScreenModel()}
+    factory { DashboardScreenModel(get()) }
     factory { LicenseScreenModel(get()) }
 }
