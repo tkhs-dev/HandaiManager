@@ -8,6 +8,7 @@ import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.HttpSendPipeline
@@ -15,6 +16,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -34,6 +36,9 @@ class CleRepository(
             followRedirects = false
             install(HttpCookies){
                 storage = fileCookiesStorage ?: AcceptAllCookiesStorage()
+            }
+            install(ContentNegotiation){
+                json()
             }
         }.also {
             it.sendPipeline.intercept(HttpSendPipeline.State) {

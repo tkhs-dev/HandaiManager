@@ -15,7 +15,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -64,7 +63,6 @@ class IdpRepository(
                 idpApi.connectSsoSite(authRequestData.samlRequest, authRequestData.relayState, authRequestData.sigAlg, authRequestData.signature)
             }
                 .flatMap{
-                    Logger.debug(this::class.simpleName, it.request.headers)
                     if(it.status.value == 200) {
                         if(it.bodyAsText().contains("利用者選択")){
                             Logger.debug(this::class.simpleName, "Pass idp auth with saved cookies")
