@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -61,7 +63,7 @@ fun ButtonElement(title: String, description:String, onClick: () -> Unit, button
                 Text(title, style = STYLE_TITLE, modifier = Modifier.wrapContentHeight())
             }
             Box(modifier = Modifier.weight(1f))
-            Button(onClick = onClick, modifier = Modifier.scale(0.8f)) {
+            OutlinedButton(onClick = onClick, modifier = Modifier.scale(0.8f), shape = RoundedCornerShape(3.dp)) {
                 buttonText()
             }
         }
