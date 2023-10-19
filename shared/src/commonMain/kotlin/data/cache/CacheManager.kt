@@ -8,4 +8,5 @@ interface CacheManager {
     fun getAllKeys(): List<String>
     fun hasKey(key: String): Boolean = getAllKeys().contains(key)
     fun clear()
+    fun clearExpired(expireOffset:Long = 0)
 }

@@ -5,6 +5,7 @@ import data.realm.model.Cache
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.copyFromRealm
 import io.realm.kotlin.ext.query
+import kotlinx.datetime.Clock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import util.Logger
@@ -41,6 +42,12 @@ class CacheManagerImpl(private val realmManager: RealmManager): CacheManager{
     override fun clear() {
         realmManager.cacheRealm.writeBlocking {
             delete(query<Cache>().find())
+        }
+    }
+
+    override fun clearExpired(expireOffset: Long) {
+        realmManager.cacheRealm.writeBlocking {
+            delete(query<Cache>("expire < ${Clock.System.now().toEpochMilliseconds() + expireOffset}").find())
         }
     }
 }
