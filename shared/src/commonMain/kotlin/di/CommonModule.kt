@@ -31,7 +31,7 @@ val commonModule = module{
     single { LicensesRepository() }
     single {LoginUseCase(get(),get(),get(),get())}
     single { PreferenceUsecase(get(), get()) }
-    factory { LaunchScreenModel(get(), get(), get()) }
+    factory { LaunchScreenModel(get(), get(), get(), get()) }
     factory { LoginScreenModel(get())}
     factory { HomeScreenModel()}
     factory { DashboardScreenModel(get()) }

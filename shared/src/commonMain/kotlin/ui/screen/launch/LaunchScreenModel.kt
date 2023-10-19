@@ -4,13 +4,18 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
+import data.cache.CacheManager
 import data.realm.RealmManager
 import domain.usecase.LoginUseCase
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.LocalDateTime
 import util.FileCookiesStorage
 import util.Logger
+import util.toEpochMilliseconds
 
-class LaunchScreenModel(private val fileCookiesStorage: FileCookiesStorage,private val realmManager: RealmManager, private val loginUseCase: LoginUseCase) : ScreenModel {
+class LaunchScreenModel(private val fileCookiesStorage: FileCookiesStorage, private val realmManager: RealmManager, private val cacheManager: CacheManager, private val loginUseCase: LoginUseCase) : ScreenModel {
     private var onNavigateToLogin: () -> Unit = {}
     private var onNavigateToHome: () -> Unit = {}
 
@@ -30,6 +35,8 @@ class LaunchScreenModel(private val fileCookiesStorage: FileCookiesStorage,priva
                     onNavigateToLogin()
                 }.onSuccess {
                     Logger.info(this::class.simpleName, "login success: navigate to home screen")
+                    cacheManager.clearExpired(DateTimePeriod(months = 1).toEpochMilliseconds())
+                    Logger.debug(this::class.simpleName, "clear too old cache")
                     onNavigateToHome()
                 }
         }
