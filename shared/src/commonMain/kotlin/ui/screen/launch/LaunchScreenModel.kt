@@ -8,9 +8,7 @@ import data.cache.CacheManager
 import data.realm.RealmManager
 import domain.usecase.LoginUseCase
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
-import kotlinx.datetime.LocalDateTime
 import util.FileCookiesStorage
 import util.Logger
 import util.toEpochMilliseconds
