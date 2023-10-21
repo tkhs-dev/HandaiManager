@@ -8,10 +8,6 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.toErrorIfNull
 import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
-import network.ApiError
-import network.AuthRequestData
-import network.AuthResponseData
-import network.KoanService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -26,6 +22,10 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import model.TimeTable
+import network.ApiError
+import network.AuthRequestData
+import network.AuthResponseData
+import network.KoanService
 import util.FileCookiesStorage
 import util.HtmlUtil
 
@@ -56,8 +56,12 @@ class KoanRepository(
             validateHttpResponse(ignoreAuthError = true) {
                 koanApi.getSamlRequest()
             }.flatMap {
-                it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
-                    .toResultOr { ApiError.InvalidResponse(it.status.value, it.bodyAsText()) }
+                if(it.headers[HttpHeaders.Location]?.contains("campusweb") == true) {
+                    Err(ApiError.InvalidResponse(it.status.value, "loggedin"))
+                }else{
+                    it.headers[HttpHeaders.Location]?.let { Url(it).parameters }
+                        .toResultOr { ApiError.InvalidResponse(it.status.value, it.bodyAsText()) }
+                }
             }.flatMap {
                 if (it["SAMLRequest"] == null || it["SigAlg"] == null || it["Signature"] == null) {
                     Err(ApiError.Unknown)
