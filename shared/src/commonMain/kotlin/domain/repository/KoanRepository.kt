@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.toErrorIfNull
 import com.github.michaelbull.result.toResultOr
 import data.cache.CacheManager
@@ -20,7 +22,9 @@ import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.LocalDate
+import model.Schedule
 import model.TimeTable
 import network.ApiError
 import network.AuthRequestData
@@ -28,6 +32,8 @@ import network.AuthResponseData
 import network.KoanService
 import util.FileCookiesStorage
 import util.HtmlUtil
+import util.Logger
+import util.getDatesBetween
 
 class KoanRepository(
     private val cacheManager: CacheManager,
@@ -96,9 +102,12 @@ class KoanRepository(
         }
     }
 
-    suspend fun getTimeTable(term:TimeTable.Term, year:Int):Result<TimeTable, ApiError>{
-        return useCache<TimeTable, ApiError>("timetable_${term.name}_$year", TimeTable.serializer()){
-            setExpire(Clock.System.now().toEpochMilliseconds()+1000*60)
+    suspend fun getTimeTable(term: TimeTable.Term, year: Int): Result<TimeTable, ApiError> {
+        return useCache<TimeTable, ApiError>(
+            "timetable_${term.name}_$year",
+            TimeTable.serializer()
+        ) {
+            setAge(DateTimePeriod(years = 1))
             koanApiRedirectable.getRishuPage()
             withContext(Dispatchers.IO) {
                 validateHttpResponse {
@@ -141,5 +150,42 @@ class KoanRepository(
                 }
             }
         }
+    }
+
+    suspend fun getSchedules(start: LocalDate, end: LocalDate): Result<List<Schedule>, ApiError> {
+        koanApiRedirectable.getSchedulePage()
+        LocalDate.getDatesBetween(start, end)
+        validateHttpResponse {
+            koanApiRedirectable.getWeeklyScheduleTable()
+        }.flatMap {
+            val fekey =
+                it.request.url.parameters["_flowExecutionKey"] ?: return@flatMap Err(
+                    ApiError.InvalidResponse(it.status.value, it.bodyAsText())
+                )
+            validateHttpResponse {
+                koanApiRedirectable.getScheduleList(
+                    flowExecutionKey = fekey,
+                    startDay = "${start.year}/${
+                        start.monthNumber.toString().padStart(2, '0')
+                    }/${start.dayOfMonth.toString().padStart(2, '0')}",
+                    startDay_year = start.year,
+                    startDay_month = start.monthNumber,
+                    startDay_day = start.dayOfMonth,
+                    endDay = "${end.year}/${
+                        end.monthNumber.toString().padStart(2, '0')
+                    }/${end.dayOfMonth.toString().padStart(2, '0')}",
+                    endDay_year = end.year,
+                    endDay_month = end.monthNumber,
+                    endDay_day = end.dayOfMonth,
+                    rishuchuFlg = true,
+                    _rishuchuFlg = 1,
+                    kyokanCode = "",
+                    shozokuCode = ""
+                )
+            }
+        }
+            .onSuccess { Logger.debug(this::class.simpleName, it.bodyAsText()) }
+            .onFailure { Logger.error(this::class.simpleName, it) }
+        return Ok(listOf())
     }
 }
