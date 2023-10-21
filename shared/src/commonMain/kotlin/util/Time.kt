@@ -2,6 +2,7 @@ package util
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.Month.APRIL
@@ -19,6 +20,7 @@ import kotlinx.datetime.Month.SEPTEMBER
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.number
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -135,4 +137,18 @@ fun Month.length(isLeapYear: Boolean): Int{
         DECEMBER -> 31
         else -> 31
     }
+}
+
+fun LocalDate.Companion.getDatesBetween(start: LocalDate, end: LocalDate): List<LocalDate> {
+    val dates = mutableListOf<LocalDate>()
+    var date = start
+    while (date <= end) {
+        dates.add(date)
+        date = date.plus(DatePeriod(days = 1))
+    }
+    return dates
+}
+
+fun DateTimePeriod.toEpochMilliseconds(): Long {
+    return (years * 365 + months * 30 + days) * 24 * 60 * 60 * 1000L
 }
