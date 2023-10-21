@@ -34,6 +34,6 @@ val commonModule = module{
     factory { LaunchScreenModel(get(), get(), get(), get()) }
     factory { LoginScreenModel(get())}
     factory { HomeScreenModel()}
-    factory { DashboardScreenModel(get()) }
+    factory { DashboardScreenModel(get(), get()) }
     factory { LicenseScreenModel(get()) }
 }
