@@ -7,14 +7,16 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.orElse
 import com.github.michaelbull.result.toResultOr
 import domain.repository.CleRepository
 import domain.repository.CredentialRepository
 import domain.repository.IdpRepository
 import domain.repository.KoanRepository
 import domain.repository.SSOApiRepository
-import model.Credential
 import kotlinx.datetime.Clock
+import model.Credential
+import network.ApiError
 import util.Logger
 import util.TotpUtil
 
@@ -27,6 +29,13 @@ class LoginUseCase(
     private suspend fun prepareForLogin(apiRepo:SSOApiRepository): Result<LoginStatus, Unit>{
         return apiRepo.getAuthRequest()
             .andThen { idpRepository.prepareForLogin(it) }
+            .orElse {
+                if(it is ApiError.InvalidResponse && it.message.equals("loggedin")) {
+                    Ok(IdpRepository.IdpStatus.SUCCESS)
+                }else{
+                    Err(it)
+                }
+            }
             .map {
                 when (it) {
                     IdpRepository.IdpStatus.NEED_CREDENTIALS -> LoginStatus.NEED_CREDENTIALS
@@ -67,7 +76,7 @@ class LoginUseCase(
             when (it) {
                 LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
                 LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
-                LoginStatus.SUCCESS -> Ok(it)
+                LoginStatus.SUCCESS -> return Ok(Unit)
             }
         }.flatMap {
             when (it) {
