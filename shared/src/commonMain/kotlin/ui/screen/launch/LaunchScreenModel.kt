@@ -28,6 +28,7 @@ class LaunchScreenModel(private val fileCookiesStorage: FileCookiesStorage, priv
             fileCookiesStorage.loadCookies()
             realmManager.open()
             loginUseCase.loginCleWithSavedCredential()
+            loginUseCase.loginKoanWithSavedCredential()
                 .onFailure {
                     Logger.info(this::class.simpleName, "login failed: navigate to login screen")
                     onNavigateToLogin()
