@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 data class TimeTable(val year:Int, val term:Term, val classes:List<DayTimeTable>){
     @Serializable
     sealed class TimeTableClass{
+        @Serializable
         data class Class(val id:String, val name:String?, val teacher:String?, val room:List<String>?):TimeTableClass()
+        @Serializable
         object Empty:TimeTableClass()
     }
 
