@@ -7,7 +7,7 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.flatMap
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.orElse
+import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.toResultOr
 import domain.repository.CleRepository
 import domain.repository.CredentialRepository
@@ -29,13 +29,6 @@ class LoginUseCase(
     private suspend fun prepareForLogin(apiRepo:SSOApiRepository): Result<LoginStatus, Unit>{
         return apiRepo.getAuthRequest()
             .andThen { idpRepository.prepareForLogin(it) }
-            .orElse {
-                if(it is ApiError.InvalidResponse && it.message.equals("loggedin")) {
-                    Ok(IdpRepository.IdpStatus.SUCCESS)
-                }else{
-                    Err(it)
-                }
-            }
             .map {
                 when (it) {
                     IdpRepository.IdpStatus.NEED_CREDENTIALS -> LoginStatus.NEED_CREDENTIALS
@@ -76,7 +69,7 @@ class LoginUseCase(
             when (it) {
                 LoginStatus.NEED_CREDENTIALS -> authPassword(credential.userId, credential.password)
                 LoginStatus.NEED_MFA -> credential.otpSecret?.let { authWithOtpSecret(it) }?: Err(Unit)
-                LoginStatus.SUCCESS -> return Ok(Unit)
+                LoginStatus.SUCCESS -> Ok(it)
             }
         }.flatMap {
             when (it) {
@@ -97,7 +90,15 @@ class LoginUseCase(
     }
 
     suspend fun loginKoan(credential: Credential): Result<Unit, Unit> {
-        return login(koanRepository, prepareForLoginKoan(),credential)
+        return koanRepository.getAuthRequest()
+            .onFailure {
+                if(it is ApiError.InvalidResponse && it.message?.equals("loggedin") == true) {
+                    return Ok(Unit)
+                }
+            }
+            .flatMap {
+                login(koanRepository, prepareForLoginKoan(),credential)
+            }.mapError {  }
     }
 
     suspend fun authPassword(userId: String, password: String): Result<LoginStatus, Unit> {
