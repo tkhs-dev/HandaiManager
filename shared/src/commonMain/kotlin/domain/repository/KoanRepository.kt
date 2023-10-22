@@ -108,7 +108,6 @@ class KoanRepository(
             TimeTable.serializer()
         ) {
             setAge(DateTimePeriod(years = 1))
-            koanApiRedirectable.getRishuPage()
             withContext(Dispatchers.IO) {
                 validateHttpResponse {
                     koanApiRedirectable.getTimeTable()
@@ -153,7 +152,6 @@ class KoanRepository(
     }
 
     suspend fun getSchedules(start: LocalDate, end: LocalDate): Result<List<Schedule>, ApiError> {
-        koanApiRedirectable.getSchedulePage()
         LocalDate.getDatesBetween(start, end)
         validateHttpResponse {
             koanApiRedirectable.getWeeklyScheduleTable()
