@@ -180,6 +180,13 @@ class KoanRepository(
                     kyokanCode = "",
                     shozokuCode = ""
                 )
+            }.flatMap {
+                if(it.status == HttpStatusCode.Found) {
+                    Ok(koanApiRedirectable.getNextFlow(Url(it.headers[HttpHeaders.Location]!!).parameters["_flowExecutionKey"]
+                        ?: return@flatMap Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))))
+                }else{
+                    Err(ApiError.InvalidResponse(it.status.value, it.bodyAsText()))
+                }
             }
         }
             .onSuccess { Logger.debug(this::class.simpleName, it.bodyAsText()) }
