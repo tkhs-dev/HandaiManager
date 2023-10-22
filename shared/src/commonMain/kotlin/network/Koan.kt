@@ -19,6 +19,8 @@ interface KoanService{
     @FormUrlEncoded
     suspend fun authSamlSso(@Field("SAMLResponse") samlResponse:String, @Field("RelayState") relayState:String?, @Field("button") button:String = "Send"): HttpResponse
 
+    @GET("campusweb/campussquare.do")
+    suspend fun getNextFlow(@Query("_flowExecutionKey") flowExecutionKey: String): HttpResponse
     @GET("campusweb/campusportal.do?page=main&tabId=rs")
     suspend fun getRishuPage(): HttpResponse
 
