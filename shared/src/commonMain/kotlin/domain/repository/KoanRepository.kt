@@ -24,6 +24,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
 import model.Schedule
 import model.TimeTable
 import network.ApiError
@@ -152,6 +153,8 @@ class KoanRepository(
     }
 
     suspend fun getSchedules(start: LocalDate, end: LocalDate): Result<List<Schedule>, ApiError> {
+        if((start - end).months >= 6) throw IllegalArgumentException("start and end must be within 6 months")
+        if(start > end) throw IllegalArgumentException("start must be before end")
         LocalDate.getDatesBetween(start, end)
         validateHttpResponse {
             koanApiRedirectable.getWeeklyScheduleTable()
